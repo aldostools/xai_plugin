@@ -40,37 +40,97 @@ For example:
 
 ```
 Power Options
-• Turn Off: Turns off the PS3
-• Hard Reboot: Reboots the PS3 completely
 • Soft Reboot: Reboots the PS3 softly
+• Hard Reboot: Reboots the PS3 completely
 • Reboot LV2: Reboots the LV2
+• Turn Off: Turns off the PS3
 
 File Manager
-• All Active Devices: Manage all active partitions
 • Internal Hard Disk Drive 0: Manage PS3 files in /dev_hdd0
 • Internal Hard Disk Drive 1: Manage PS3 cached files in /dev_hdd1
-• USB Mass Storage Devices: Manage files on your USB devices
 • Internal Flash Memory: Manage PS3 internal flash files
 • Optical Disc: Manage optical discs
+• USB Mass Storage Devices: Manage files on your USB devices
 • Memory Cards: Manage memory cards
 
-Basic Tools
-• Decrypt 3k3y/Redump ISOs (HDD): Decrypts 3k33y/redump ISOs from dev_hdd0/PS3ISO with 'd1/disc' key file if it is available
-• Decrypt 3k3y/Redump ISOs (USB): Decrypts 3k33y/redump ISOs from dev_usb/PS3ISO with 'd1/disc' key file if it is available
-• Import Licenses to rap.bin: Imports rap licenses from /dev_hdd0/exdata or /dev_usb/exdata to rap.bin file
-• Export Licenses from rap.bin: Exports rap licenses from rap.bin file to /dev_hdd0/exdata or /dev_usb/exdata
-• Fix CBOMB: Patches RTC with static value (default) or current updated PS3 system date. Useful for PS3 with dead CMOS battery
-• Show Total PS3 Usage: Shows the total days that the PS3 has been on, number of times it has been turned on and off
-• FAN Speed: Shows current FAN speed
-• PS3 Temperature: Shows current CPU and RSX temperature in Celsius and Fahrenheit
+Overclock Tools
+• RSX Core Clock
+• RSX Memory Clock
 • Check GPU/VRAM clock speed: Checks current GPU/VRAM clock speed
-• Show IDPS: Shows current IDPS
-• Show PSID: Shows current PSID
-• Show IP: Show current IP if it exists
-• Toggle Coldboot: Toggles between custom/original coldboot.raf
+• Default Frequencies: Sets default RSX's core and memory clock frequencies
+
+Overclock Tools > Custom Values
+• 500MHz/650MHz (Default): Overclocks RSX's current core and memory clock frequencies
+• 550MHz/700MHz: Overclocks RSX's current core and memory clock frequencies
+• 600MHz/750MHz: Overclocks RSX's current core and memory clock frequencies
+• 650MHz/800MHz: Overclocks RSX's current core and memory clock frequencies
+• 700MHz/850MHz: Overclocks RSX's current core and memory clock frequencies
+• 750MHz/900MHz: Overclocks RSX's current core and memory clock frequencies
+• 800MHz/950MHz: Overclocks RSX's current core and memory clock frequencies
+• 850MHz/1000MHz: Overclocks RSX's current core and memory clock frequencies
+• 900MHz/1050MHz: Overclocks RSX's current core and memory clock frequencies
+• 1050MHz/1050MHz: Overclocks RSX's current core and memory clock frequencies
+
+Overclock Tools > RSX Core Clock
+• 300MHz: Overclocks RSX's current core clock frequency
+• 350MHz: Overclocks RSX's current core clock frequency
+• 400MHz: Overclocks RSX's current core clock frequency
+• 450MHz: Overclocks RSX's current core clock frequency
+• 500MHz (Default): Overclocks RSX's current core clock frequency
+• 550MHz: Overclocks RSX's current core clock frequency
+• 600MHz: Overclocks RSX's current core clock frequency
+• 650MHz: Overclocks RSX's current core clock frequency
+• 700MHz: Overclocks RSX's current core clock frequency
+• 750MHz: Overclocks RSX's current core clock frequency
+• 800MHz: Overclocks RSX's current core clock frequency
+• 850MHz: Overclocks RSX's current core clock frequency
+• 900MHz: Overclocks RSX's current core clock frequency
+• 950MHz: Overclocks RSX's current core clock frequency
+• 1000MHz: Overclocks RSX's current core clock frequency
+• 1050MHz: Overclocks RSX's current core clock frequency
+
+Overclock Tools > RSX Memory Clock
+• 300MHz: Overclocks RSX's current memory clock frequency
+• 325MHz: Overclocks RSX's current memory clock frequency
+• 350MHz: Overclocks RSX's current memory clock frequency
+• 375MHz: Overclocks RSX's current memory clock frequency
+• 400MHz: Overclocks RSX's current memory clock frequency
+• 425MHz: Overclocks RSX's current memory clock frequency
+• 450MHz: Overclocks RSX's current memory clock frequency
+• 475MHz: Overclocks RSX's current memory clock frequency
+• 500MHz: Overclocks RSX's current memory clock frequency
+• 500MHz: Overclocks RSX's current memory clock frequency
+• 525MHz: Overclocks RSX's current memory clock frequency
+• 550MHz: Overclocks RSX's current memory clock frequency
+• 575MHz: Overclocks RSX's current memory clock frequency
+• 600MHz: Overclocks RSX's current memory clock frequency
+• 625MHz: Overclocks RSX's current memory clock frequency
+• 650MHz (Default): Overclocks RSX's current memory clock frequency
+• 675MHz: Overclocks RSX's current memory clock frequency
+• 700MHz: Overclocks RSX's current memory clock frequency
+• 725MHz: Overclocks RSX's current memory clock frequency
+• 750MHz: Overclocks RSX's current memory clock frequency
+• 775MHz: Overclocks RSX's current memory clock frequency
+• 800MHz: Overclocks RSX's current memory clock frequency
+• 825MHz: Overclocks RSX's current memory clock frequency
+• 850MHz: Overclocks RSX's current memory clock frequency
+• 875MHz: Overclocks RSX's current memory clock frequency
+• 900MHz: Overclocks RSX's current memory clock frequency
+• 925MHz: Overclocks RSX's current memory clock frequency
+• 950MHz: Overclocks RSX's current memory clock frequency
+• 975MHz: Overclocks RSX's current memory clock frequency
+• 1000MHz: Overclocks RSX's current memory clock frequency
+• 1025MHz: Overclocks RSX's current memory clock frequency
+• 1050MHz: Overclocks RSX's current memory clock frequency
+
+Basic Tools
+• Show Total PS3 Usage: Shows the total days that the PS3 has been on, number of times it has been turned on and off
+• Show IDs: Shows current IDPS, PSID, IP and MAC
+• Fix CBOMB: Patches RTC with static value (default) or current updated PS3 system date. Useful for PS3 with dead CMOS battery
+• Toggle DLNA: Allows you to share content between devices through your home WI-FI network
 • Toggle Third Party BT Headset: Enables or diasbles usage of third party BT headset
-• Show BD Drive Information: Shows current BD Drive Information
-• Show XAI Version: Shows the current version of xai_plugin
+• Decrypt 3k3y/Redump ISOs (HDD): Decrypts 3k3y/redump ISOs from dev_hdd0/PS3ISO with 'd1/disc' key file if it is available
+• Decrypt 3k3y/Redump ISOs (USB): Decrypts 3k3y/redump ISOs from dev_usb/PS3ISO with 'd1/disc' key file if it is available
 
 Basic Tools > xRegistry Tools
 • Show Region Info: Shows current DVD TV mode and BDVD/DVD/PS3 region
@@ -94,33 +154,9 @@ Basic Tools > xRegistry Tools > Region Tools
 • Hong Kong: Sets BDVD/DVD/PS3 region to Hong Kong in xRegistry (0x8E)
 • Brazil: Sets BDVD/DVD/PS3 region to Brazil in xRegistry (0x8F)
 
-Basic Tools > Led Tools
-• Off: Turns off the PS3's power LED
-• Red (Static): Sets the PS3's power LED to static red
-• Green (Static): Sets the PS3's power LED to static green
-• Yellow (Static): Sets the PS3's power LED to static yellow
-• Red (Slow blink): Sets the PS3's power LED to slow blink red
-• Green (Slow blink): Sets the PS3's power LED to slow blink green
-• Yellow (Slow blink): Sets the PS3's power LED to slow blink yellow
-• Red (Fast blink): Sets the PS3's power LED to fast blink red
-• Green (Fast blink): Sets the PS3's power LED to fast blink green
-• Yellow (Fast blink): Sets the PS3's power LED to fast blink yellow
-• Yellow + Green (Fast blink): Sets the PS3's power LED to fast blink yellow + green
-• Yellow + Red (Fast blink): Sets the PS3's power LED to fast blink yellow + red
-• Yellow + Green (Slow blink): Sets the PS3's power LED to slow blink yellow + green
-• Yellow + Red (Slow blink): Sets the PS3's power LED to slow blink yellow + red
-• Rainbow Mode: Sets the PS3's power LED to rainbow mode
-• Special Mode 1: Sets the PS3's power LED to special mode 1
-• Special Mode 2: Sets the PS3's power LED to special mode 2
-
-Basic Tools > Buzzer Tools
-• Single Beep: Generates a single beep with the internal buzzer
-• Double Beep: Generates a double beep with the internal buzzer
-• Triple Beep: Generates a triple beep with the internal buzzer
-• Continuous Beep: Generates a continuous beep with the internal buzzer
-
 FAN Tools
-• Control FAN Mode: DISABLED: Disables Cobra’s Control FAN
+• Temperature Information: Shows current CPU and RSX temperature, FAN speed and FAN and PS2 mode
+• Control FAN Mode: DISABLED: Disables Control FAN
 • Control FAN Mode: SYSCON: Allows the PS3's SYSCON to control FAN speed
 • Control FAN Mode: MAX: Set Cobra FAN speed to 0xFF
 
@@ -155,48 +191,51 @@ Cobra Tools > FAN Tools > PS2 FAN
 • PS2 Fan Mode: 90%: Sets FAN speed to 0xE8 on PS2 game
 
 QA Tools
+• Check QA Flags: Check if QA flags are enabled or disabled
 • Enable QA Flags (Normal): Enables QA Flags through "Network Settings"
 • Enable QA Flags (Advanced): Enables advanced QA Flags through "Network Settings"
 • Disable QA Flags: Disables QA Flags through "Network Settings"
 
 Cobra Tools
 • Cobra Information: Shows current Cobra information
-• Check Syscall 8: Checks Cobra's Syscall 8 status
-• Create Syscalls: Create syscalls 6, 7, 8, 9, 10, 11, 15 and 35
-• Toggle PSN Protection: Enables/blocks PSN login when syscalls are enabled
-• Toggle TrophyUnlocker: Enables/disables TrophyUnlocker INGAME plugin
-• Allow Restore Syscalls: Allows restoring syscalls through "System Update"
-• Skip license creation: Skips overwriting license file (RIF) if it already exists
-• Create license: Creates RIF licenses from RAP files from "x:\exdata"
 • Toggle Plugins: Enables/disables Cobra plugins from /dev_hdd0/boot_plugins.txt
-• Toggle OFW Mode on Boot: Toggles between CFW syscalls on boot enabled, disabled and partial
-• Toggle PS2 Disc Icon: Toggles between default and blue PS3 disc icon in XMB
 • Toggle Gameboot: Enables or disables original PLAYSTATION 3 gameboot when statring a game or application
-• Toggle Hidden Trophy Info: Enables or disables hidden trophies title, details and icon in XMB/INGMAE
+• Toggle Coldboot: Toggles between custom/original coldboot.raf
 • Toggle Coldboot Animation: Enables or disables the coldboot animation and sound on boot
-• Toggle Epilepsy Warning: Enables or disables epilepsy warning on boot
+• Toggle XMB Waves:Enables/disables FW 2.70 waves
+• Toggle External Cobra: Enables/disables loading external Cobra payloads and plugins from /dev_usb000
+• Toggle OFW Mode on Boot: Toggles between CFW syscalls on boot enabled, disabled and partial
 • Toggle Cobra Version: Toggles between release and debug versions (reboot is required)
 • Toggle Cobra: Enables or disables Cobra (reboot is required)
 
 PSN Tools
 • Disable Syscalls: Disables syscalls and remove history files
+• Create Syscalls: Create syscalls 6, 7, 8, 9, 10, 11, 15 and 35
+• Toggle PSN Protection: Enables/blocks PSN login when syscalls are enabled
 • Spoof TargetID: Spoofs current TargetID in LV2 with EID5's TargetID
 • Spoof IDPS: Spoofs IDPS in LV2 with a valid IDPS from "/dev_usb/IDPS.txt"
 • Spoof PSID: Spoofs PSID in LV2 with a valid PSID from "/dev_usb/PSID.txt"
+• Spoof MAC: Spoofs MAC in LV1 with a valid MAC from "/dev_usb/MAC.txt" - "/dev_hdd0/tmp/MAC.txt"
+
+Account Tools
 • Show accountID: Shows current user's accountID
 • Create accountID: Creates a fake accountID for current user's in xRegistry
 • Overwrite accountID: Overwrites current user's accountID with a fake one in xRegistry
+• Remove accountID: Removes current user's accountID in xRegistry
 • Activate account: Creates act.dat file in the current local account
-• Create license: Creates RIF licenses from RAP files from "x:\exdata"
 • Backup activation file: Creates a backup of act.dat to /dev_usb or /dev_hdd0
 • Disable account: Deletes current user's activation file act.dat permanently
+• Create license: Creates RIF licenses from RAP files from "x:\exdata"
+• Import Licenses to rap.bin: Imports rap licenses from /dev_hdd0/exdata or /dev_usb/exdata to rap.bin file
+• Export Licenses from rap.bin: Exports rap licenses from rap.bin file to /dev_hdd0/exdata or /dev_usb/exdata
 • Convert savedata: Converts savedata from "/dev_usbXXX/PS3/SAVEDATA" to your own savedata
+• Toggle TrophyUnlocker: Enables/disables TrophyUnlocker INGAME plugin
+• Toggle Hidden Trophy Info: Enables or disables hidden trophies title, details and icon in XMB/INGAME
 
 Dump Tools
 • View Log: http://localhost/dev_hdd0/tmp/cfw_settings.log (webMAN MOD is required for this function)
 • Clean Log File: Resets /dev_hdd0/tmp/cfw_settings.log file
-• Dump IDPS: Saves IDPS to log file
-• Dump PSID: Saves PSID to log file
+• Dump IDs: Saves IDPS, PSID, MAC and act.dat to /dev_hdd0/tmp or /dev_usb
 • Export RAP license: Exports the RAP license from the RIF licenses installed in the current user account in /dev_usb/exdata
 • Dump LV2: Dumps LV2 to /dev_usb or /dev_hdd0/tmp
 • Dump LV1: Dumps LV1 to /dev_usb or /dev_hdd0/tmp
@@ -211,6 +250,16 @@ Dump Tools
 • Log KLicense usage: Saves filename and klicensee to log file
 • Log Secure File ID usage: Writes save data name and file ID key to log file
 • Dump Disc Hash Key: Retrieves disc hash key from an ORIGINAL game disc
+
+CEX2DEX Tools
+• Show Information: Shows current Firmware, Kernel, TargetID, VSH, XMB Host and Debug Settings
+• Check TargetID: Checks current TargetID from EID0 and EID5
+• Convert to CEX: Converts PS3 to CEX/RETAIL with eid_root_key from /dev_usb or /dev_hdd0
+• Convert to DEX: Converts PS3 to DEX/DEBUG with eid_root_key from /dev_usb or /dev_hdd0
+• Swap Kernel: Swaps between CEX and DEX Kernels
+• Toggle XMB Mode: Switch between CEX and DEX XMB
+• Toggle Host Information on XMB: Enables/disables host information on XMB
+• Toggle Debug Settings: Switch between CEX and DEX Debug settings
 
 Rebug Tools
 • LV1 Peek/Poke Support: Patch unused LV1 syscalls 182 and 183
@@ -231,23 +280,13 @@ Rebug Tools
 • Initial GuestOS Loader: Enable GuestOS mode 1 for GameOS
 
 OtherOS Tools
-• Resize VFLASH/NAND Regions: Resizes VFLASH/NAND Regions 5 to allow OtherOS
-• Install Petitboot: Installs Petitboot to VFLASH/NAND Regions 5 from USB device
+• Install OtherOS: Will resize VFLASH/NAND regions and install petitboot
 • Set OtherOS Boot Flag: Reboots the PS3 and boot OtherOS
 • Set GameOS Boot Flag: Fixes issues loading PS2 games when OtherOS boot flag is set
 
-CEX2DEX Tools
-• Convert to CEX: Converts PS3 to CEX/RETAIL with eid_root_key from /dev_usb or /dev_hdd0
-• Convert to DEX: Converts PS3 to DEX/DEBUG with eid_root_key from /dev_usb or /dev_hdd0
-• Swap Kernel: Swaps between CEX and DEX Kernels
-• Check TargetID: Checks current TargetID from EID0 and EID5
-• Toggle Host Information on XMB: Enables/disables host information on XMB
-• Toggle XMB Mode: Switch between CEX and DEX XMB
-• Toggle Debug Settings: Switch between CEX and DEX Debug settings
-• Show Information: Shows current Firmware, Kernel, TargetID, VSH, XMB Host and Debug Settings
-
 Service Tools
 • Display Applicable Version: Displays minimum downgrade version
+• Show BD Drive Information: Shows current BD Drive Information
 • Check File System: Reboots and allows you to check and repair filesystem
 • Rebuild Database: Reboots with Database rebuilding flag set
 • Toggle Recovery Mode: Reboot to Recovery Mode (Not supported on NAND models!)
@@ -263,10 +302,33 @@ Service Tools > Advanced Service Tools
 • Enable VSH Debugging: Enables debugging vsh.self
 • Enable Support for DEX OFW: Enables OFW DEX installation on converted PS3 Retail
 • Disable Support for DEX OFW: Disables OFW DEX installation on converted PS3 Retail
+• Enable Support for DECR MFW: Enables MFW DECR installation on converted PS3 Retail
+• Disable Support for DECR MFW: Disables MFW DECR installation on converted PS3 Retail
 • Load LV2 kernel: Loads lv2_kernel.self file from /dev_usb000 or /dev_flash
 
+Service Tools > Led Tools
+• Off: Turns off the PS3's power LED
+• Red (Static): Sets the PS3's power LED to static red
+• Green (Static): Sets the PS3's power LED to static green
+• Yellow (Static): Sets the PS3's power LED to static yellow
+• Red (Slow blink): Sets the PS3's power LED to slow blink red
+• Green (Slow blink): Sets the PS3's power LED to slow blink green
+• Yellow (Slow blink): Sets the PS3's power LED to slow blink yellow
+• Red (Fast blink): Sets the PS3's power LED to fast blink red
+• Green (Fast blink): Sets the PS3's power LED to fast blink green
+• Yellow (Fast blink): Sets the PS3's power LED to fast blink yellow
+• Yellow + Green (Fast blink): Sets the PS3's power LED to fast blink yellow + green
+• Yellow + Red (Fast blink): Sets the PS3's power LED to fast blink yellow + red
+• Yellow + Green (Slow blink): Sets the PS3's power LED to slow blink yellow + green
+• Yellow + Red (Slow blink): Sets the PS3's power LED to slow blink yellow + red
+• Rainbow Mode: Sets the PS3's power LED to rainbow mode
+• Special Mode 1: Sets the PS3's power LED to special mode 1
+• Special Mode 2: Sets the PS3's power LED to special mode 2
+
 Updates
+• Show XAI Version: Shows the current version of xai_plugin
 • xai_plugin: Downloads the latest update of xai plugin
+• CFW 4.92 Fixes: Download fixes for modules ONLY for CFW 4.92 Evilnat
 • PS2 EMUs Cobra: Downloads the latest update of PS1/PS2 EMUs Cobra
 • PS2 EMUs MOD: Downloads the latest update of PS1/PS2 EMUs MOD by mrjaredbeta and kozarovv
 ```
