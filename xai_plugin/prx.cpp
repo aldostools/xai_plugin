@@ -17,8 +17,9 @@
 #include "eeprom.h"
 #include "rebugtoolbox.h"
 #include "erk.h"
+#include "overclock.h"
 
-#define XAI_VERSION "XAI Version 1.20"
+#define XAI_VERSION "XAI Version 1.24"
 
 SYS_MODULE_INFO(xai_plugin, 0, 1, 1);
 SYS_MODULE_START(_xai_plugin_prx_entry);
@@ -173,22 +174,22 @@ static void plugin_thread(uint64_t arg)
 	// Cobra options	
 	else if(strcmp(action_thread, "cobra_info") == 0)	
 		show_cobra_info();
-	else if(strcmp(action_thread, "check_syscall8") == 0)	
-		checkSyscall(SC_COBRA_SYSCALL8);		
+	/*else if(strcmp(action_thread, "check_syscall8") == 0)	
+		checkSyscall(SC_COBRA_SYSCALL8);*/
 	else if(strcmp(action_thread, "create_rif_license") == 0)	
 		create_rifs();		
 	else if(strcmp(action_thread, "create_syscalls") == 0)	
 		create_syscalls();
-	else if(strcmp(action_thread, "enable_ftp") == 0)
-		load_ftp();
-	else if(strcmp(action_thread, "disable_ftp") == 0)
-		unload_ftp();
+	/*else if(strcmp(action_thread, "enable_ftp") == 0)
+		load_ftp();*/
+	/*else if(strcmp(action_thread, "disable_ftp") == 0)
+		unload_ftp();*/
 	else if(strcmp(action_thread, "toggle_trophy_unlocker") == 0)
 		toggle_trophy_unlocker();
-	else if(strcmp(action_thread, "allow_restore_sc") == 0)	
-		allow_restore_sc();	
-	else if(strcmp(action_thread, "skip_existing_rif") == 0)	
-		skip_existing_rif();	
+	/*else if(strcmp(action_thread, "allow_restore_sc") == 0)	
+		allow_restore_sc();*/
+	/*else if(strcmp(action_thread, "skip_existing_rif") == 0)	
+		skip_existing_rif();*/
 	else if(strcmp(action_thread, "enable_whatsnew") == 0)	
 		enable_WhatsNew();
 	else if(strcmp(action_thread, "toggle_external_cobra") == 0)	
@@ -215,16 +216,18 @@ static void plugin_thread(uint64_t arg)
 		toggle_npsignin_lck();
 	else if(strcmp(action_thread, "toggle_ofw_mode") == 0)	
 		toggle_ofw_mode();
-	else if(strcmp(action_thread, "toggle_ps2_icon") == 0)	
-		toogle_PS2_disc_icon();
+	/*else if(strcmp(action_thread, "toggle_ps2_icon") == 0)	
+		toogle_PS2_disc_icon();*/
 	else if(strcmp(action_thread, "toggle_gameboot") == 0)	
 		toggle_gameboot();
 	else if(strcmp(action_thread, "toggle_coldboot_animation") == 0)	
 		toggle_coldboot_animation();
-	else if(strcmp(action_thread, "toggle_epilepsy_warning") == 0)	
-		toggle_epilepsy_warning();
+	/*else if(strcmp(action_thread, "toggle_epilepsy_warning") == 0)	
+		toggle_epilepsy_warning();*/
 	else if(strcmp(action_thread, "toggle_hidden_trophy_patch") == 0)	
 		toggle_hidden_trophy_patch();
+	else if(strcmp(action_thread, "toggle_xmb_waves") == 0)	
+		toggle_xmb_waves();
 
 	// PSN Tools
 	else if(strcmp(action_thread, "disable_syscalls") == 0)	
@@ -275,84 +278,84 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "fan_mode_60") == 0)	
 	{
 		if(save_cobra_fan_cfg(DYNAMIC_FAN_60) == 0)
-			showMessage("msg_cobra_fan_dynamic_60", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_dynamic_degrees", "60C/140F", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_mode_65") == 0)	
 	{
 		if(save_cobra_fan_cfg(DYNAMIC_FAN_65) == 0)
-			showMessage("msg_cobra_fan_dynamic_65", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_dynamic_degrees", "65C/149F", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_mode_70") == 0)	
 	{
 		if(save_cobra_fan_cfg(DYNAMIC_FAN_70) == 0)
-			showMessage("msg_cobra_fan_dynamic_70", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_dynamic_degrees", "70C/158F", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_mode_75") == 0)	
 	{
 		if(save_cobra_fan_cfg(DYNAMIC_FAN_75) == 0)
-			showMessage("msg_cobra_fan_dynamic_75", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_dynamic_degrees", "75C/167F", TEX_SUCCESS);
 	}
 
 	// Manual Modes
 	else if(strcmp(action_thread, "fan_manual_40") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_40) == 0)
-			showMessage("msg_cobra_fan_manual_40", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "40%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_45") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_45) == 0)
-			showMessage("msg_cobra_fan_manual_45", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "45%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_50") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_50) == 0)
-			showMessage("msg_cobra_fan_manual_50", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "50%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_55") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_55) == 0)
-			showMessage("msg_cobra_fan_manual_55", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "55%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_60") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_60) == 0)
-			showMessage("msg_cobra_fan_manual_60", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "60%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_65") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_65) == 0)
-			showMessage("msg_cobra_fan_manual_65", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "65%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_70") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_70) == 0)
-			showMessage("msg_cobra_fan_manual_70", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "70%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_75") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_75) == 0)
-			showMessage("msg_cobra_fan_manual_75", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "75%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_80") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_80) == 0)
-			showMessage("msg_cobra_fan_manual_80", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "80%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_85") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_85) == 0)
-			showMessage("msg_cobra_fan_manual_85", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "85%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_90") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_90) == 0)
-			showMessage("msg_cobra_fan_manual_90", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "90%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_manual_95") == 0)	
 	{
 		if(save_cobra_fan_cfg(FAN_MANUAL_95) == 0)
-			showMessage("msg_cobra_fan_manual_95", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_manual_percentage", "95%", TEX_SUCCESS);
 	}
 
 	// PS2 Fan modes
@@ -369,33 +372,156 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "fan_ps2mode_40") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_40) == 0)
-			showMessage("msg_cobra_fan_ps2mode_40", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "40%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_ps2mode_50") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_50) == 0)
-			showMessage("msg_cobra_fan_ps2mode_50", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "50%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_ps2mode_60") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_60) == 0)
-			showMessage("msg_cobra_fan_ps2mode_60", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "60%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_ps2mode_70") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_70) == 0)
-			showMessage("msg_cobra_fan_ps2mode_70", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "70%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_ps2mode_80") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_80) == 0)
-			showMessage("msg_cobra_fan_ps2mode_80", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "80%", TEX_SUCCESS);
 	}
 	else if(strcmp(action_thread, "fan_ps2mode_90") == 0)	
 	{
 		if(save_ps2_fan_cfg(FAN_PS2_90) == 0)
-			showMessage("msg_cobra_fan_ps2mode_90", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_cobra_fan_ps2mode_percentage", "90%", TEX_SUCCESS);
 	}
+
+	// Overclock options
+	// Custom values
+	else if(strcmp(action_thread, "show_clocks") == 0)	
+		getClockSpeeds();
+	else if(strcmp(action_thread, "oc_default") == 0)	
+		set_overclock_freq(CORE_500MHz, MEMORY_650MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_550_700") == 0)	
+		set_overclock_freq(CORE_550MHz, MEMORY_700MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_600_750") == 0)	
+		set_overclock_freq(CORE_600MHz, MEMORY_750MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_650_800") == 0)	
+		set_overclock_freq(CORE_650MHz, MEMORY_800MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_700_850") == 0)	
+		set_overclock_freq(CORE_700MHz, MEMORY_850MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_750_900") == 0)
+		set_overclock_freq(CORE_750MHz, MEMORY_900MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_800_950") == 0)
+		set_overclock_freq(CORE_800MHz, MEMORY_950MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_850_1000") == 0)
+		set_overclock_freq(CORE_850MHz, MEMORY_1000MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_900_1050") == 0)
+		set_overclock_freq(CORE_900MHz, MEMORY_1050MHz, MODE_FULL);
+	else if(strcmp(action_thread, "oc_1050_1050") == 0)
+		set_overclock_freq(CORE_1050MHz, MEMORY_1050MHz, MODE_FULL);
+
+	// Core
+	else if(strcmp(action_thread, "oc_core_300") == 0)
+		set_overclock_freq(CORE_300MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_350") == 0)
+		set_overclock_freq(CORE_350MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_400") == 0)
+		set_overclock_freq(CORE_400MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_450") == 0)
+		set_overclock_freq(CORE_450MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_500") == 0)
+		set_overclock_freq(CORE_500MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_550") == 0)
+		set_overclock_freq(CORE_550MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_600") == 0)
+		set_overclock_freq(CORE_600MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_650") == 0)
+		set_overclock_freq(CORE_650MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_700") == 0)
+		set_overclock_freq(CORE_700MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_750") == 0)
+		set_overclock_freq(CORE_750MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_800") == 0)
+		set_overclock_freq(CORE_800MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_850") == 0)
+		set_overclock_freq(CORE_850MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_900") == 0)
+		set_overclock_freq(CORE_900MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_950") == 0)
+		set_overclock_freq(CORE_950MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_1000") == 0)
+		set_overclock_freq(CORE_1000MHz, NULL, MODE_CORE);
+	else if(strcmp(action_thread, "oc_core_1050") == 0)
+		set_overclock_freq(CORE_1050MHz, NULL, MODE_CORE);
+
+	// Memory
+	else if(strcmp(action_thread, "oc_memory_300") == 0)
+		set_overclock_freq(NULL, MEMORY_300MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_325") == 0)
+		set_overclock_freq(NULL, MEMORY_325MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_350") == 0)
+		set_overclock_freq(NULL, MEMORY_350MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_375") == 0)
+		set_overclock_freq(NULL, MEMORY_375MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_400") == 0)
+		set_overclock_freq(NULL, MEMORY_400MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_425") == 0)
+		set_overclock_freq(NULL, MEMORY_425MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_450") == 0)
+		set_overclock_freq(NULL, MEMORY_450MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_475") == 0)
+		set_overclock_freq(NULL, MEMORY_475MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_500") == 0)
+		set_overclock_freq(NULL, MEMORY_500MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_525") == 0)
+		set_overclock_freq(NULL, MEMORY_525MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_550") == 0)
+		set_overclock_freq(NULL, MEMORY_550MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_575") == 0)
+		set_overclock_freq(NULL, MEMORY_575MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_600") == 0)
+		set_overclock_freq(NULL, MEMORY_600MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_625") == 0)
+		set_overclock_freq(NULL, MEMORY_625MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_650") == 0)
+		set_overclock_freq(NULL, MEMORY_650MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_675") == 0)
+		set_overclock_freq(NULL, MEMORY_675MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_700") == 0)
+		set_overclock_freq(NULL, MEMORY_700MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_725") == 0)
+		set_overclock_freq(NULL, MEMORY_725MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_750") == 0)
+		set_overclock_freq(NULL, MEMORY_750MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_775") == 0)
+		set_overclock_freq(NULL, MEMORY_775MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_800") == 0)
+		set_overclock_freq(NULL, MEMORY_800MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_825") == 0)
+		set_overclock_freq(NULL, MEMORY_825MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_850") == 0)
+		set_overclock_freq(NULL, MEMORY_850MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_875") == 0)
+		set_overclock_freq(NULL, MEMORY_875MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_900") == 0)
+		set_overclock_freq(NULL, MEMORY_900MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_925") == 0)
+		set_overclock_freq(NULL, MEMORY_925MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_950") == 0)
+		set_overclock_freq(NULL, MEMORY_950MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_975") == 0)
+		set_overclock_freq(NULL, MEMORY_975MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_1000") == 0)
+		set_overclock_freq(NULL, MEMORY_1000MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_1025") == 0)
+		set_overclock_freq(NULL, MEMORY_1025MHz, MODE_MEMORY);
+	else if(strcmp(action_thread, "oc_memory_1050") == 0)
+		set_overclock_freq(NULL, MEMORY_1050MHz, MODE_MEMORY);
 
 	// Basic options	
 	else if(strcmp(action_thread, "ps3_lifetime") == 0)	
@@ -403,7 +529,7 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "fan_data") == 0)	
 		get_temperature_data();	
 	else if(strcmp(action_thread, "show_ids") == 0)	
-		show_ids();	
+		show_ids();
 	else if(strcmp(action_thread, "show_ip") == 0)	
 		show_ip();
 	else if(strcmp(action_thread, "decrypt_redump_isos_hdd") == 0)	
@@ -415,9 +541,7 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "bin2rap") == 0)	
 		bin2rap();
 	else if(strcmp(action_thread, "cbomb") == 0)	
-		Fix_CBOMB();
-	else if(strcmp(action_thread, "show_clocks") == 0)	
-		getClockSpeeds();
+		Fix_CBOMB();	
 	else if(strcmp(action_thread, "toggle_dlna") == 0)	
 		toggle_dlna();	
 	else if(strcmp(action_thread, "toggle_coldboot") == 0)
@@ -444,13 +568,13 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "buzzer_triple") == 0)
 		buzzer(TRIPLE_BEEP);
 	else if(strcmp(action_thread, "buzzer_continuous") == 0)
-		buzzer(CONTINUOUS_BEEP);	
+		buzzer(CONTINUOUS_BEEP);
 
 	// CEX2DEX Options
 	else if(strcmp(action_thread, "convert_cex") == 0)
-		cex2dex(CEX_TO_DEX);
-	else if(strcmp(action_thread, "convert_dex") == 0)
 		cex2dex(DEX_TO_CEX);
+	else if(strcmp(action_thread, "convert_dex") == 0)
+		cex2dex(CEX_TO_DEX);
 	else if(strcmp(action_thread, "swap_kernel") == 0)
 		swapKernel();
 	else if(strcmp(action_thread, "check_targetid") == 0)			
@@ -554,7 +678,7 @@ static void plugin_thread(uint64_t arg)
 	{
 		if(normal_mode() == CELL_OK)
 		{
-			showMessage("msg_normal_mode", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_xmb_status", "NORMAL MODE", TEX_SUCCESS);
 			wait(2);
 			rebootXMB(SYS_SOFT_REBOOT);
 		}
@@ -563,7 +687,7 @@ static void plugin_thread(uint64_t arg)
 	{
 		if(rebug_mode() == CELL_OK)
 		{
-			showMessage("msg_rebug_mode", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+			customMessage("msg_xmb_status", "REBUG MODE", TEX_SUCCESS);
 			wait(2);
 			rebootXMB(SYS_SOFT_REBOOT);
 		}
@@ -613,9 +737,13 @@ static void plugin_thread(uint64_t arg)
 	else if(strcmp(action_thread, "patch_prodg") == 0)	
 		Patch_ProDG();
 	else if(strcmp(action_thread, "enable_dex_support") == 0)	
-		enable_dex_support();
+		enable_custom_support(0);
 	else if(strcmp(action_thread, "disable_dex_support") == 0)	
-		disable_dex_support();
+		disable_custom_support(0);
+	else if(strcmp(action_thread, "enable_decr_support") == 0)	
+		enable_custom_support(1);
+	else if(strcmp(action_thread, "disable_decr_support") == 0)	
+		disable_custom_support(1);
 	else if(strcmp(action_thread, "toggle_devblind") == 0)			
 		toggle_devblind();	
 	else if(strcmp(action_thread, "load_kernel") == 0)	
@@ -727,15 +855,8 @@ static void plugin_thread(uint64_t arg)
 		rtb_go();
 
 	// OtherOS options
-	else if(strcmp(action_thread, "otheros_resize") == 0)	
-	{
-		if(check_flash_type())
-			setup_vflash();
-		else
-			setup_flash();
-	}
-	else if(strcmp(action_thread, "otheros_petitboot") == 0)
-		install_petitboot();
+	else if(strcmp(action_thread, "otheros_install") == 0)	
+		setup_otherOS();
 	else if(strcmp(action_thread, "otheros_flag") == 0)
 		set_flag(OTHEROS_FLAG);
 	else if(strcmp(action_thread, "gameos_flag") == 0)

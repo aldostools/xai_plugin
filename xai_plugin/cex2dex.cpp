@@ -17,6 +17,8 @@
 #include "erk.h"
 #include "cex2dex.h"
 
+static wchar_t wchar_string[120]; // Global variable for swprintf
+
 static uint8_t eid0_key_seed[] = 
 {
 	0xAB, 0xCA, 0xAD, 0x17, 0x71, 0xEF, 0xAB, 0xFC,
@@ -41,7 +43,8 @@ static uint8_t null_iv[] =
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Real DEX donor (Thanks to zecoxao)
+// Real DEX/DECR donor (Thanks to zecoxao)
+// DEX
 uint8_t donor_idps[0x10] =
 {
 	0x00, 0x00, 0x00, 0x01, 0x00, 0x82, 0x00, 0x01, 0x04, 0x00, 0x23, 0xBB, 0x5E, 0xDF, 0x37, 0x05
@@ -84,6 +87,49 @@ uint8_t donor_omac[0x10] =
 	0xA0, 0xC8, 0xC5, 0x71, 0x6B, 0xC1, 0xC9, 0xAE, 0x9B, 0x18, 0xB5, 0x51, 0x48, 0x3A, 0xB1, 0xC0
 };
 
+// DECR
+uint8_t donor_idps_rftool[0x10] =
+{
+	0x00, 0x00, 0x00, 0x01, 0x00, 0x81, 0x00, 0x09, 0x04, 0x00, 0x1C, 0x10, 0x01, 0x84, 0x6C, 0xFB
+};
+
+uint8_t donor_data_rftool[0x28] =
+{
+	0x36, 0x92, 0x54, 0x6D, 0x53, 0x88, 0xFC, 0xD2, 0x71, 0xF6, 0x21, 0xC1, 0x7A, 0x71, 0xB0, 0x35,
+	0xAB, 0x8D, 0x8B, 0x4B, 0x0B, 0x8D, 0xC7, 0xF2, 0x85, 0xF8, 0x01, 0x70, 0x37, 0x48, 0x31, 0x35, 
+	0x24, 0x47, 0xA1, 0x23, 0x89, 0x6B, 0x54, 0x98
+};
+
+uint8_t donor_R_rftool[0x14] = 
+{
+	0x34, 0x5D, 0xF5, 0x66, 0x91, 0xC0, 0xFB, 0xC0, 0x79, 0x0C, 0xD4, 0x3A, 0x6A, 0xD5, 0xBC, 0x97, 
+	0x38, 0xF4, 0x71, 0x42
+};
+
+uint8_t donor_S_rftool[0x14] = 
+{
+	0x08, 0x60, 0xE5, 0xDB, 0x88, 0xB7, 0x33, 0x84, 0xB4, 0x95, 0x56, 0x3F, 0xD9, 0x82, 0x47, 0xFA, 
+	0xB8, 0xD0, 0xBB, 0xB3
+};
+
+uint8_t donor_pub_rftool[0x28] =
+{
+	0x94, 0xD1, 0x00, 0xBE, 0x6E, 0x24, 0x99, 0x1D, 0x65, 0xD9, 0x3F, 0x3D, 0xA9, 0x38, 0x85, 0x8C, 
+	0xEC, 0x2D, 0x13, 0x30, 0x51, 0xF4, 0x7D, 0xB4, 0x28, 0x7A, 0xC8, 0x66, 0x31, 0x71, 0x9B, 0x31, 
+	0x57, 0x3E, 0xF7, 0xCC, 0xE0, 0x71, 0xCA, 0x8A
+};
+
+uint8_t donor_enc_priv_key_rftool[0x20] = 
+{
+	0x30, 0x94, 0x03, 0x84, 0xFF, 0xCB, 0x57, 0x90, 0x19, 0xCC, 0xB0, 0x05, 0x5F, 0x82, 0xB5, 0x5B, 
+	0xB1, 0xF9, 0xF4, 0xAA, 0x9F, 0x8B, 0x7B, 0x59, 0xB3, 0x4B, 0x2F, 0xCE, 0x74, 0x36, 0x4A, 0x3D
+};
+
+uint8_t donor_omac_rftool[0x10] =
+{
+	0x1E, 0x41, 0xB5, 0x3A, 0xE7, 0x2C, 0xC5, 0xBD, 0x6B, 0x5E, 0x83, 0x0E, 0xBB, 0x34, 0x9D, 0x7A
+};
+
 uint64_t donor_padding = 0x00;
 
 int true_dex, true_dex_dex_idps;
@@ -93,6 +139,88 @@ uint8_t section0_eid0_enc_modded[0xc0];
 
 uint32_t readlen = 0;
 uint32_t writelen = 0;
+
+static void set_cex_modules()
+{
+	CellFsStat statinfo;
+
+	mount_dev_blind();
+
+	if(!cellFsStat(VSH_SELF_CEX, &statinfo) && cellFsStat(VSH_SELF_DEX, &statinfo))
+	{
+		log("Setting CEX vsh.self...\n");
+
+		if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_DEX))
+			cellFsRename(VSH_SELF_CEX, VSH_SELF_DEFAULT);
+	}
+
+	if(!cellFsStat(XMB_SPRX_CEX, &statinfo) && cellFsStat(XMB_SPRX_DEX, &statinfo))
+	{
+		log("Setting CEX xmb_plugin.sprx...\n");
+
+		if(!cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_DEX))
+			cellFsRename(XMB_SPRX_CEX, XMB_SPRX_DEFAULT);
+	}
+
+	if(!cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &statinfo) && cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &statinfo))
+	{
+		log("Setting CEX software_update_plugin.sprx...\n");
+
+		if(!cellFsRename(SOFTWARE_UPDATE_SPRX_DEFAULT, SOFTWARE_UPDATE_SPRX_DEX))
+			cellFsRename(SOFTWARE_UPDATE_SPRX_CEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
+	}
+
+	if(!cellFsStat(SYSCONF_SPRX_CEX, &statinfo) && cellFsStat(SYSCONF_SPRX_DEX, &statinfo))
+	{
+		log("Setting CEX sysconf_plugin.sprx...\n");
+
+		if(!cellFsRename(SYSCONF_SPRX_DEFAULT, SYSCONF_SPRX_DEX))
+			cellFsRename(SYSCONF_SPRX_CEX, SYSCONF_SPRX_DEFAULT);
+	}
+
+	umount_dev_blind();
+}
+
+static void set_dex_modules()
+{
+	CellFsStat statinfo;
+
+	mount_dev_blind();
+
+	if(!cellFsStat(VSH_SELF_DEX, &statinfo) && cellFsStat(VSH_SELF_CEX, &statinfo))
+	{
+		log("Setting DEX vsh.self...\n");
+
+		if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_CEX))
+			cellFsRename(VSH_SELF_DEX, VSH_SELF_DEFAULT);
+	}
+
+	if(!cellFsStat(XMB_SPRX_DEX, &statinfo) && cellFsStat(XMB_SPRX_CEX, &statinfo))
+	{
+		log("Setting DEX xmb_plugin.sprx...\n");
+
+		if(!cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_CEX))
+			cellFsRename(XMB_SPRX_DEX, XMB_SPRX_DEFAULT);
+	}
+
+	if(!cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &statinfo) && cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &statinfo))
+	{
+		log("Setting DEX software_update_plugin.sprx...\n");
+
+		if(!cellFsRename(SOFTWARE_UPDATE_SPRX_DEFAULT, SOFTWARE_UPDATE_SPRX_CEX))
+			cellFsRename(SOFTWARE_UPDATE_SPRX_DEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
+	}
+
+	if(!cellFsStat(SYSCONF_SPRX_DEX, &statinfo) && cellFsStat(SYSCONF_SPRX_CEX, &statinfo))
+	{
+		log("Setting DEX sysconf_plugin.sprx...\n");
+
+		if(!cellFsRename(SYSCONF_SPRX_DEFAULT, SYSCONF_SPRX_CEX))
+			cellFsRename(SYSCONF_SPRX_DEX, SYSCONF_SPRX_DEFAULT);
+	}
+
+	umount_dev_blind();
+}
 
 static int indiv_gen(uint8_t *seed0, uint8_t *indiv, uint8_t *erk) 
 {
@@ -164,7 +292,7 @@ int receive_eid_idps(int eid, uint8_t output[0x10])
 
 	disc_size = disc_info.sector_size * disc_info.total_sectors;
 	uint32_t buf_size = disc_info.sector_size*1;
-	uint8_t* rb = (unsigned char *) memalign__(128, buf_size);
+	uint8_t* rb = (unsigned char *) __memalign(128, buf_size);
 	memset(rb, 0, buf_size);	
 
 	if(disc_size)
@@ -172,7 +300,7 @@ int receive_eid_idps(int eid, uint8_t output[0x10])
 		if(sys_storage_read2(dev_id, start_flash_sector, 1, rb, &readlen, FLASH_FLAGS))
 		{
 			sys_storage_close(dev_id);
-			free__(rb);
+			__free(rb);
 			return 1;
 		}		
 		
@@ -183,7 +311,7 @@ int receive_eid_idps(int eid, uint8_t output[0x10])
 	}
 	
 	sys_storage_close(dev_id);
-	free__(rb);
+	__free(rb);
 
 	return 0;
 }
@@ -216,21 +344,21 @@ int getTargetID(int mode)
 	if(mode)
 	{
 		targetid = read_buffer[0x75];
-		free__(read_buffer);
+		__free(read_buffer);
 		return targetid;
 	}
 
 	if(receive_eid_idps(EID5, idps))
 		goto error;
 
-	string = RetrieveString("msg_show_eid_target", (char*)XAI_PLUGIN);	
+	string = RetrieveString("msg_show_eid_target", (char*)XAI_PLUGIN);
 
 	swprintf_(wchar_string, 120, (wchar_t*)string, (uint8_t)read_buffer[0x75], 
-		(read_buffer[0x75] == 0x82 ? (int)"Debug" : (int)"Retail"), 
+		(read_buffer[0x75] == 0x81 ? (int)"Decr" : (read_buffer[0x75] == 0x82 ? (int)"Debug" : (int)"Retail")), 
 		(uint8_t)idps[5], 
-		(idps[5] == 0x82 ? (int)"Debug" : (int)"Retail"));
+		(idps[5] == 0x81 ? (int)"Decr" : (idps[5] == 0x82 ? (int)"Debug" : (int)"Retail")));
 
-	free__(read_buffer);
+	__free(read_buffer);
 
 	PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_INFO2);
 
@@ -238,7 +366,7 @@ int getTargetID(int mode)
 
 error:
 	sys_storage_close(dev_id);
-	free__(read_buffer);
+	__free(read_buffer);
 	showMessage("msg_show_eid_target_error", (char *)XAI_PLUGIN, (char *)TEX_INFO2);	
 	return 1;
 }
@@ -259,28 +387,28 @@ void get_ps3_info()
 	else if(lv2_peek(DEX_OFFSET) == DEX)
 		strncpy(target, "DEX", 3);
 	else
-		strncpy(target, "???", 3);
+		strncpy(target, "-", 3);
 		
 	if(cellFsStat(VSH_SELF_CD ".dex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(vsh, "CEX", 3);
 	else if(cellFsStat(VSH_SELF_CD ".cex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(vsh, "DEX", 3);
 	else
-		strncpy(vsh, "???", 3);
+		strncpy(vsh, "-", 3);
 
 	if(cellFsStat(XMB_PLUGIN_CD ".dex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(xmb_plugin, "CEX", 3);
 	else if(cellFsStat(XMB_PLUGIN_CD ".cex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(xmb_plugin, "DEX", 3);
 	else
-		strncpy(xmb_plugin, "???", 3);
+		strncpy(xmb_plugin, "-", 3);
 
 	if(cellFsStat(SYSCONF_PLUGIN_CD ".dex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(sysconf_plugin, "CEX", 3);
 	else if(cellFsStat(SYSCONF_PLUGIN_CD ".cex", &stat) == CELL_FS_SUCCEEDED)
 		strncpy(sysconf_plugin, "DEX", 3);
 	else
-		strncpy(sysconf_plugin, "???", 3);
+		strncpy(sysconf_plugin, "-", 3);
 
 	system_call_1(387, (uint64_t)platform_info);
 
@@ -294,6 +422,8 @@ void get_ps3_info()
 		strncpy(idps_char, "Original", 8);
 	else if(memcmp(idps0, donor_idps, 0x10) == SUCCEEDED)
 		strncpy(idps_char, "Real DEX", 8);
+	else if(memcmp(idps0, donor_idps_rftool, 0x10) == SUCCEEDED)
+		strncpy(idps_char, "Real DECR", 9);
 	else if(idps0[5] == 0x82 && idps5[5] != 0x82)
 		strncpy(idps_char, "Converted", 9);
 	else
@@ -303,7 +433,7 @@ void get_ps3_info()
 
 	swprintf_(wchar_string, 240, (wchar_t*)string, platform_info[0], platform_info[1], platform_info[2] >> 4, (int)target, 
 		(int)idps_char,
-		idps0[5] == 0x82 ? (int)"DEX" : (int)"CEX",
+		(idps0[5] == 0x81 ? (int)"DECR" : (idps0[5] == 0x82 ? (int)"DEX" : (int)"CEX")),
 		(int)vsh,
 		(int)xmb_plugin,
 		(int)sysconf_plugin);	
@@ -360,9 +490,10 @@ static int checkCurrentKernel()
 		log("checkCurrentKernel(): CEX Kernel detected\n");		
 		return 1;
 	}
-	else if(lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032332F30312FULL || // 2023/01/
-			lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032342F30322FULL || // 2024/02/
-			lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032352F30332FULL)   // 2025/03/
+	else if(lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032332F30312FULL ||  // 2023/01/
+			lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032342F30322FULL ||  // 2024/02/
+			lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323032352F30332FULL ||  // 2025/03/
+			lv2_peek(DEX_OFFSET) == DEX && lv2_peek(0x800000000031F028ULL) == 0x323031392F30312FULL)	// 2019/01/  
 	{
 		log("checkCurrentKernel(): DEX Kernel detected\n");
 		return 2;
@@ -454,7 +585,7 @@ int dumpFlash()
 
 	sector_count = info.capacity;
 
-	while (sector_count >= SECTORS) 
+	while(sector_count >= SECTORS) 
 	{
 		if(lv2_storage_read(dev_handle, 0, start_sector, SECTORS, buf, &sectors_read, FLASH_FLAGS))
 			goto done;	
@@ -526,7 +657,7 @@ int dumpFlash()
 
 		cellFsChmod(usb_file, 0666);
 
-		dump = (uint8_t *)malloc__(0x40000);
+		dump = (uint8_t *)__malloc(0x40000);
 
 		if(!dump)
 			goto done;
@@ -540,13 +671,13 @@ int dumpFlash()
 
 			if(cellFsRead(fd, dump, 0x40000, &nr) != CELL_FS_SUCCEEDED)
 			{
-				free__(dump);				
+				__free(dump);				
 				goto done;
 			}
 
 			if(cellFsWrite(fd_usb, dump, 0x40000, &nrw) != SUCCEEDED)
 			{
-				free__(dump);				
+				__free(dump);				
 				goto done;
 			}
 
@@ -561,7 +692,7 @@ int dumpFlash()
 			memset(dump, 0, 0x40000);
 		}
 
-		free__(dump);
+		__free(dump);
 		cellFsClose(fd_usb);
 		cellFsUnlink(file);
 	}
@@ -593,9 +724,7 @@ done:
 	if(cellFsStat(usb_file, &statinfo) == CELL_FS_SUCCEEDED)
 		cellFsUnlink(usb_file);
 
-	string = RetrieveString("msg_dumpFlash_error", (char*)XAI_PLUGIN);
-	swprintf_(wchar_string, 120, (wchar_t*)string, (int)type);	
-	PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_ERROR);		
+	customMessage("msg_dumpFlash_error", type, TEX_ERROR);	
 
 	buzzer(TRIPLE_BEEP);
 
@@ -627,7 +756,7 @@ static int setFlashKernelData(uint8_t _mode)
 	disc_size = disc_info.sector_size * disc_info.total_sectors;
 
 	uint32_t buf_size = disc_info.sector_size * 3;
-	uint8_t* read_buffer = (unsigned char *) memalign__(128, buf_size);
+	uint8_t* read_buffer = (unsigned char *) __memalign(128, buf_size);
 	uint8_t found = 0, found_ported_dex = 0, found_retail = 0;
 	uint8_t ros = 0;
 
@@ -755,18 +884,19 @@ static int setFlashKernelData(uint8_t _mode)
 	}
 
 	sys_storage_close(dev_id);
-	free__(read_buffer);
+	__free(read_buffer);
 
 	return 1;
 }
 
 void cex2dex(int mode)
 {
-	// 0 = CEX
-	// 1 = DEX
+	// 0 = DEX
+	// 1 = CEX
 
 	int dev_id, targetID, ret;	
 	int file_found = 0, usb_port;
+	int string;
 	char file[120];
 
 	uint8_t idps0[IDPS_SIZE], idps[IDPS_SIZE];
@@ -782,7 +912,7 @@ void cex2dex(int mode)
 
 	close_xml_list();
 
-	sys_timer_usleep(10000);
+	sys_timer_usleep(10000);	
 
 	// HEN
 	if(!is_hen())
@@ -806,7 +936,13 @@ void cex2dex(int mode)
 
 	if(memcmp(idps0, donor_idps, 0x10) == SUCCEEDED)
 	{
-		showMessage("msg_sup_dex_not_available", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+		customMessage("msg_sup_dex_not_available", OFW_DEX, TEX_INFO2);	
+		return;
+	}
+
+	if(memcmp(idps0, donor_idps_rftool, 0x10) == SUCCEEDED)
+	{
+		customMessage("msg_sup_dex_not_available", OFW_DECR, TEX_INFO2);	
 		return;
 	}
 
@@ -823,7 +959,7 @@ void cex2dex(int mode)
 		{
 			// Dump ERK
 			int dumped = 1;
-			showMessage("msg_dumping_erk", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+			customMessage("msg_dumping_status", "ERK", TEX_INFO2);
 			dumped = dump_eid_root_key(eid_root_key, ERK);
 
 			if(dumped)
@@ -840,7 +976,7 @@ void cex2dex(int mode)
 	if(receive_eid_idps(EID5, idps))
 		goto done;
 
-	if(readfile(file, eid_root_key, EID_ROOT_KEY_SIZE))
+	if(readFile(file, eid_root_key, EID_ROOT_KEY_SIZE))
 		goto done;
 
 	if(indiv_gen(eid0_key_seed, indiv, eid_root_key) != SUCCEEDED)
@@ -885,12 +1021,12 @@ void cex2dex(int mode)
 		goto done;
 	}	
 
-	if(mode)
+	if(!mode)
 	{
 		// DEX TargetID is already set
 		if(read_buffer[0x75] == 0x82)
 		{			
-			showMessage("msg_convert_already_dex", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+			customMessage("msg_convert_already_status", "DEX/DEBUG", TEX_INFO2);
 			return;
 		}
 
@@ -901,7 +1037,7 @@ void cex2dex(int mode)
 		// CEX TargetID is already set
 		if(read_buffer[0x75] != 0x82)
 		{			
-			showMessage("msg_convert_already_cex", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+			customMessage("msg_convert_already_status", "CEX/RETAIL", TEX_INFO2);
 			return;
 		}
 
@@ -957,7 +1093,7 @@ void cex2dex(int mode)
 		omac_verify[0x04] != digest_default[0x04] || omac_verify[0x05] != digest_default[0x05])	
 			goto done;	
 
-	if(mode)
+	if(!mode)
 		section0_eid0_dec[0x5] = 0x82;
 	else
 	{
@@ -1005,16 +1141,16 @@ void cex2dex(int mode)
 
 	sys_storage_close(dev_id);
 
-	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0);	
+	mount_dev_blind();
 
-	if(mode)
+	if(!mode) // DEX
 	{
-		if(!cellFsStat(XMB_SPRX_DEX, &statinfo) && cellFsStat(XMB_SPRX_CEX, &statinfo))
+		if(!cellFsStat(VSH_SELF_DEX, &statinfo) && cellFsStat(VSH_SELF_CEX, &statinfo))
 		{
-			log("Setting DEX xmb_plugin.sprx...\n");
+			log("Setting DEX vsh.self...\n");
 
-			if(!cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_CEX))
-				cellFsRename(XMB_SPRX_DEX, XMB_SPRX_DEFAULT);
+			if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_CEX))
+				cellFsRename(VSH_SELF_DEX, VSH_SELF_DEFAULT);
 		}
 
 		if(!cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &statinfo) && cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &statinfo))
@@ -1025,16 +1161,16 @@ void cex2dex(int mode)
 				cellFsRename(SOFTWARE_UPDATE_SPRX_DEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
 		}
 
-		showMessage("msg_convert_dex_done", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);	
+		customMessage("msg_convert_status_done", "DEX", TEX_SUCCESS);
 	}
-	else
+	else // CEX
 	{
-		if(!cellFsStat(XMB_SPRX_CEX, &statinfo) && cellFsStat(XMB_SPRX_DEX, &statinfo))
+		if(!cellFsStat(VSH_SELF_CEX, &statinfo) && cellFsStat(VSH_SELF_DEX, &statinfo))
 		{
-			log("Setting CEX xmb_plugin.sprx...\n");
+			log("Setting CEX vsh.self...\n");
 
-			if(!cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_DEX))
-				cellFsRename(XMB_SPRX_CEX, XMB_SPRX_DEFAULT);
+			if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_DEX))
+				cellFsRename(VSH_SELF_CEX, VSH_SELF_DEFAULT);
 		}
 
 		if(!cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &statinfo) && cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &statinfo))
@@ -1045,10 +1181,10 @@ void cex2dex(int mode)
 				cellFsRename(SOFTWARE_UPDATE_SPRX_CEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
 		}
 
-		showMessage("msg_convert_cex_done", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage("msg_convert_status_done", "CEX", TEX_SUCCESS);
 	}
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
+	umount_dev_blind();
 	sys_timer_usleep(10000);
 
 	wait(3);
@@ -1067,6 +1203,7 @@ done:
 void swapKernel()
 {
 	int external_cobra = 0, ret;
+	int string;
 	uint8_t idps0[IDPS_SIZE];
 	CellFsStat statinfo;
 	close_xml_list();
@@ -1086,7 +1223,13 @@ void swapKernel()
 
 	if(memcmp(idps0, donor_idps, 0x10) == SUCCEEDED)
 	{
-		showMessage("msg_sup_dex_not_available", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+		customMessage("msg_sup_dex_not_available", OFW_DEX, TEX_INFO2);		
+		return;
+	}
+
+	if(memcmp(idps0, donor_idps_rftool, 0x10) == SUCCEEDED)
+	{
+		customMessage("msg_sup_dex_not_available", OFW_DECR, TEX_INFO2);	
 		return;
 	}
 
@@ -1120,19 +1263,8 @@ void swapKernel()
 
 			if(!setFlashKernelData(CEX_TO_DEX))	
 			{
-				cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0);
-
-				if(!cellFsStat(VSH_SELF_DEX, &statinfo) && cellFsStat(VSH_SELF_CEX, &statinfo))
-				{
-					log("Setting DEX vsh.self...\n");
-
-					if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_CEX))
-						cellFsRename(VSH_SELF_DEX, VSH_SELF_DEFAULT);
-				}
-
-				cellFsUtilUnMount(DEV_BLIND, 0);
-
-				showMessage("msg_swap_kernel_dex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);		
+				set_dex_modules();
+				customMessage("msg_swap_kernel_status", "DEX/Debug", TEX_SUCCESS);
 				wait(3);
 				rebootXMB(SYS_SOFT_REBOOT);
 			}
@@ -1147,7 +1279,8 @@ void swapKernel()
 
 			if(!setFlashKernelData(DEX_TO_CEX))
 			{
-				showMessage("msg_swap_kernel_cex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+				set_cex_modules();
+				customMessage("msg_swap_kernel_status", "CEX/Retail", TEX_SUCCESS);
 				wait(3);
 				rebootXMB(SYS_SOFT_REBOOT);
 			}
@@ -1214,9 +1347,7 @@ int spoof_with_eid5()
 		return 1;
 	}
 
-	int string = RetrieveString("msg_spoof_target_id_done", (char*)XAI_PLUGIN);	
-	swprintf_(wchar_string, 120, (wchar_t*)string, (int)idps[5]);
-	PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);
+	customMessage("msg_spoof_target_id_done", idps[5], TEX_SUCCESS);
 
 	return 0;
 }
@@ -1232,31 +1363,24 @@ int toggle_xmbplugin()
 		return 1;
 	}
 
-	if(cellFsStat(DEV_BLIND, &stat) != CELL_OK)
-	{
-		if(cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0) != CELL_OK)
-		{
-			showMessage("msg_devblind_mount_error", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-			return 1;
-		}
-	}
+	mount_dev_blind();
 
 	if(!cellFsStat(XMB_SPRX_DEX, &stat) && cellFsStat(XMB_SPRX_CEX, &stat))
 	{
 		cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_CEX);
 		cellFsRename(XMB_SPRX_DEX, XMB_SPRX_DEFAULT);
-		showMessage("msg_toggle_xmbplugin_dex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage2("msg_toggle_xmbplugin_status", "msg_lower_enabled", TEX_SUCCESS);
 	}
 	else if(!cellFsStat(XMB_SPRX_CEX, &stat) && cellFsStat(XMB_SPRX_DEX, &stat))
 	{
 		cellFsRename(XMB_SPRX_DEFAULT, XMB_SPRX_DEX);
 		cellFsRename(XMB_SPRX_CEX, XMB_SPRX_DEFAULT);
-		showMessage("msg_toggle_xmbplugin_cex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage2("msg_toggle_xmbplugin_status", "msg_lower_disabled", TEX_SUCCESS);
 	}
 	else
 		showMessage("msg_toggle_xmbplugin_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
+	umount_dev_blind();
 
 	return 0;
 }
@@ -1272,16 +1396,11 @@ int toggle_vsh()
 		return 1;
 	}
 
-	if(cellFsStat(DEV_BLIND, &stat) != CELL_OK)
-	{
-		if(cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0) != CELL_OK)
-		{
-			showMessage("msg_devblind_mount_error", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-			return 1;
-		}
-	}
+	close_xml_list();
 
-	if(getTargetID(1) == 0x82 && lv2_peek(DEX_OFFSET) == DEX && 
+	mount_dev_blind();
+
+	if((getTargetID(1) == 0x81 && lv2_peek(DEX_OFFSET) == DEX || getTargetID(1) == 0x82 && lv2_peek(DEX_OFFSET) == DEX) && 
 		(lv2_peek(0x800000000031F028ULL) == 0x323032332F30312FULL || //2023/01/
 		lv2_peek(0x800000000031F028ULL) == 0x323032332F30332FULL ||  //2023/03/
 		lv2_peek(0x800000000031F028ULL) == 0x323032342F30322FULL ||  //2024/02/
@@ -1295,18 +1414,18 @@ int toggle_vsh()
 	{
 		cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_CEX);
 		cellFsRename(VSH_SELF_DEX, VSH_SELF_DEFAULT);
-		showMessage("msg_toggle_vsh_dex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage("msg_toggle_status", "DEX XMB Mode", TEX_SUCCESS);
 	}
 	else if(!cellFsStat(VSH_SELF_CEX, &stat) && cellFsStat(VSH_SELF_DEX, &stat))
 	{
 		cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_DEX);
 		cellFsRename(VSH_SELF_CEX, VSH_SELF_DEFAULT);
-		showMessage("msg_toggle_vsh_cex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage("msg_toggle_status", "CEX XMB Mode", TEX_SUCCESS);
 	}
 	else
 		showMessage("msg_toggle_vsh_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
+	umount_dev_blind();
 
 	return 0;
 }
@@ -1322,39 +1441,35 @@ int toggle_sysconf()
 		return 1;
 	}
 
-	if(cellFsStat(DEV_BLIND, &stat) != CELL_OK)
-	{
-		if(cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0) != CELL_OK)
-		{
-			showMessage("msg_devblind_mount_error", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-			return 1;
-		}
-	}
+	mount_dev_blind();
 
 	if(!cellFsStat(SYSCONF_SPRX_DEX, &stat) && cellFsStat(SYSCONF_SPRX_CEX, &stat))
 	{
 		cellFsRename(SYSCONF_SPRX_DEFAULT, SYSCONF_SPRX_CEX);
 		cellFsRename(SYSCONF_SPRX_DEX, SYSCONF_SPRX_DEFAULT);
-		showMessage("msg_toggle_sysconf_dex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage("msg_toggle_status", "DEX Debug Settings", TEX_SUCCESS);
 	}
 	else if(!cellFsStat(SYSCONF_SPRX_CEX, &stat) && cellFsStat(SYSCONF_SPRX_DEX, &stat))
 	{
 		cellFsRename(SYSCONF_SPRX_DEFAULT, SYSCONF_SPRX_DEX);
 		cellFsRename(SYSCONF_SPRX_CEX, SYSCONF_SPRX_DEFAULT);
-		showMessage("msg_toggle_sysconf_cex", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+		customMessage("msg_toggle_status", "CEX Debug Settings", TEX_SUCCESS);
 	}
 	else
 		showMessage("msg_toggle_sysconf_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
+	umount_dev_blind();
 
 	return 0;
 }
 
-int enable_dex_support()
+// 0: DEX
+// 1: DECR
+int enable_custom_support(int mode)
 {
 	char file[120], eid0_backup[120];
 	int usb_port, dev_id, ret;
+	int string;
 
 	CellFsStat statinfo;
 
@@ -1391,6 +1506,15 @@ int enable_dex_support()
 		return 1;
 	}
 
+	if(mode)
+	{
+		if(!check_flash_type())
+		{
+			customMessage("msg_dump_status_not_supported", "NOR", TEX_ERROR);
+			return 1;
+		}
+	}
+
 	if(receive_eid_idps(EID0, idps_eid0) || receive_eid_idps(EID5, idps_eid5))
 	{
 		showMessage("msg_spoof_idps_get_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
@@ -1399,14 +1523,32 @@ int enable_dex_support()
 
 	if(idps_eid5[7] > 0x0B)
 	{
-		showMessage("msg_sup_dex_incompatible", (char *)XAI_PLUGIN, (char *)TEX_INFO2);	
+		customMessage("msg_sup_dex_incompatible", (mode ? OFW_DECR : OFW_DEX), TEX_INFO2);	
 		return 1;
 	}
 
-	if(idps_eid0[5] == 0x82 && memcmp(idps_eid0, donor_idps, 0x10))
+	if(memcmp(idps_eid0, (mode ? donor_idps : donor_idps_rftool), 0x10) == SUCCEEDED)
 	{
-		showMessage("msg_sup_dex_cex_needed", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+		customMessage("msg_sup_dex_not_available", (mode ? OFW_DEX : OFW_DECR), TEX_INFO2);
 		return 1;
+	}
+
+	if(mode)
+	{
+		if(idps_eid0[5] != 0x82 && memcmp(idps_eid0, donor_idps_rftool, 0x10))
+		{
+			showMessage("msg_swap_kernel_dex_needed", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+			return 1;
+		}
+	}
+	else
+	{
+		if(idps_eid0[5] == 0x81 && memcmp(idps_eid0, donor_idps_rftool, 0x10) ||
+		   idps_eid0[5] == 0x82 && memcmp(idps_eid0, donor_idps, 0x10))
+		{
+			showMessage("msg_sup_dex_cex_needed", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+			return 1;
+		}
 	}
 
 	// Search eid_root_key
@@ -1421,7 +1563,7 @@ int enable_dex_support()
 		{
 			// Dump ERK
 			int dumped = 1;
-			showMessage("msg_dumping_erk", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+			customMessage("msg_dumping_status", "ERK", TEX_INFO2);
 			dumped = dump_eid_root_key(eid_root_key, ERK);
 
 			if(dumped)
@@ -1436,7 +1578,7 @@ int enable_dex_support()
 	}
 
 	// Read eid_root_key
-	if(readfile(file, eid_root_key, EID_ROOT_KEY_SIZE) != CELL_FS_SUCCEEDED)
+	if(readFile(file, eid_root_key, EID_ROOT_KEY_SIZE) != CELL_FS_SUCCEEDED)
 	{
 		showMessage("msg_erk_not_found", (char *)XAI_PLUGIN, (char *)TEX_ERROR);		
 		log("Unable to read eid_root_key file\n");
@@ -1460,11 +1602,14 @@ int enable_dex_support()
 		goto error;	
 	}
 
-	if(!check_flash_type())
+	if(!mode)
 	{
-		start_flash_sector = 0x204;
-		device = FLASH_DEVICE_NAND;
-	}	
+		if(!check_flash_type())
+		{
+			start_flash_sector = 0x204;
+			device = FLASH_DEVICE_NAND;
+		}	
+	}
 
 	if(!start_flash_sector || !device)
 	{
@@ -1482,17 +1627,18 @@ int enable_dex_support()
 	{
 		log("Unable to read flash storage\n");
 		goto error;
+	}		
+
+	if(!memcmp(eid_buffer + 0x70, donor_idps_rftool, 0x10) ||
+	   !memcmp(eid_buffer + 0x70, donor_idps, 0x10))
+	{
+		sys_storage_close(dev_id);
+		customMessage("msg_sup_dex_already_enabled", (mode ? OFW_DECR : OFW_DEX), TEX_INFO2);
+		return 1;
 	}
 
 	// Creating backup of original EID0 data
-	memcpy(eid_backup, eid_buffer, 0x200);
-
-	if(!memcmp(eid_buffer + 0x70, donor_idps, 0x10))		
-	{
-		sys_storage_close(dev_id);
-		showMessage("msg_sup_dex_already_enabled", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
-		return 1;
-	}
+	memcpy(eid_backup, eid_buffer, 0x200);	
 
 	showMessage("msg_swap_kernel_wait", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
 
@@ -1510,20 +1656,10 @@ int enable_dex_support()
 		goto error;
 	}
 
-	// Checking if partial IDPS is valid
-	// TargetID must not be 0x82
-	if(eid_buffer[0x70] != 0x00 || eid_buffer[0x71] != 0x00 || eid_buffer[0x72] != 0x00 || 
-		eid_buffer[0x73] != 0x01 || eid_buffer[0x74] != 0x00 || eid_buffer[0x75] == 0x82)
-	{
-		showMessage("msg_idps_not_valid", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-		return 1;
-	}
-
-	sprintf_(eid0_backup, EID0_BACKUP, usb_port);
+	sprintf_(eid0_backup, (mode ? EID0_DECR_BACKUP : EID0_BACKUP), usb_port);
 	
 	// Makes 2nd backup on /dev_hdd0/tmp in case it was necessary
-	if(cellFsStat(EID0_BACKUP_TMP, &statinfo) != CELL_FS_SUCCEEDED)
-		saveFile(EID0_BACKUP_TMP, eid_buffer, 0x200);
+	saveFile((mode ? EID0_DECR_BACKUP_TMP : EID0_BACKUP_TMP), eid_buffer, 0x200);
 
 	if(saveFile(eid0_backup, eid_buffer, 0x200) != CELL_FS_SUCCEEDED)
 	{
@@ -1531,14 +1667,28 @@ int enable_dex_support()
 		goto error;
 	}
 
-	// Creating donor structure	
-	memcpy(donor_buf, donor_idps, sizeof(donor_idps));
-	memcpy(donor_buf + 0x10, donor_data, sizeof(donor_data));
-	memcpy(donor_buf + 0x38, donor_R, sizeof(donor_R));
-	memcpy(donor_buf + 0x4C, donor_S, sizeof(donor_S));
-	memcpy(donor_buf + 0x60, donor_pub, sizeof(donor_pub));
-	memcpy(donor_buf + 0x88, donor_enc_priv_key, sizeof(donor_enc_priv_key));
-	memcpy(donor_buf + 0xA8, donor_omac, sizeof(donor_omac));
+	// Creating donor structure
+	if(mode)
+	{
+		memcpy(donor_buf, donor_idps_rftool, sizeof(donor_idps_rftool));
+		memcpy(donor_buf + 0x10, donor_data_rftool, sizeof(donor_data_rftool));
+		memcpy(donor_buf + 0x38, donor_R_rftool, sizeof(donor_R_rftool));
+		memcpy(donor_buf + 0x4C, donor_S_rftool, sizeof(donor_S_rftool));
+		memcpy(donor_buf + 0x60, donor_pub_rftool, sizeof(donor_pub_rftool));
+		memcpy(donor_buf + 0x88, donor_enc_priv_key_rftool, sizeof(donor_enc_priv_key_rftool));
+		memcpy(donor_buf + 0xA8, donor_omac_rftool, sizeof(donor_omac_rftool));
+	}	
+	else
+	{
+		memcpy(donor_buf, donor_idps, sizeof(donor_idps));
+		memcpy(donor_buf + 0x10, donor_data, sizeof(donor_data));
+		memcpy(donor_buf + 0x38, donor_R, sizeof(donor_R));
+		memcpy(donor_buf + 0x4C, donor_S, sizeof(donor_S));
+		memcpy(donor_buf + 0x60, donor_pub, sizeof(donor_pub));
+		memcpy(donor_buf + 0x88, donor_enc_priv_key, sizeof(donor_enc_priv_key));
+		memcpy(donor_buf + 0xA8, donor_omac, sizeof(donor_omac));
+	}
+
 	memcpy(donor_buf + 0xB8, &donor_padding, sizeof(donor_padding));
 	
 	aes_omac1(cmac_hash, donor_buf, 0xA8, eid_section_key, 128);	
@@ -1550,21 +1700,39 @@ int enable_dex_support()
 		goto error;
 	}
 
-	memcpy(eid_buffer + 0x70, donor_idps, 0x10);
+	memcpy(eid_buffer + 0x70, (mode ? donor_idps_rftool : donor_idps), 0x10);
 	memcpy(eid_buffer + 0x90, encrypted_donor_buf, 0xC0);
 
 	// Checking if all is ok
-	if(memcmp(donor_buf, donor_idps, 0x10)                ||
-	   memcmp(donor_buf + 0x10, donor_data, 0x28)         ||
-	   memcmp(donor_buf + 0x38, donor_R, 0x14)            ||
-	   memcmp(donor_buf + 0x4C, donor_S, 0x14)            ||
-	   memcmp(donor_buf + 0x60, donor_pub, 0x28)          ||
-	   memcmp(donor_buf + 0x88, donor_enc_priv_key, 0x20) ||
-	   memcmp(donor_buf + 0xA8, cmac_hash, 0x10)          ||
-	   memcmp(donor_buf + 0xB8, &donor_padding, 0x08))
+	if(mode)
 	{
-		log("Error found on patched EID0 section, aborting!\n");
-		goto error;
+		if(memcmp(donor_buf, donor_idps_rftool, 0x10)                ||
+		   memcmp(donor_buf + 0x10, donor_data_rftool, 0x28)         ||
+		   memcmp(donor_buf + 0x38, donor_R_rftool, 0x14)            ||
+		   memcmp(donor_buf + 0x4C, donor_S_rftool, 0x14)            ||
+		   memcmp(donor_buf + 0x60, donor_pub_rftool, 0x28)          ||
+		   memcmp(donor_buf + 0x88, donor_enc_priv_key_rftool, 0x20) ||
+		   memcmp(donor_buf + 0xA8, cmac_hash, 0x10)          		 ||
+		   memcmp(donor_buf + 0xB8, &donor_padding, 0x08))
+		{
+			log("Error found on patched EID0 section, aborting!\n");
+			goto error;
+		}
+	}
+	else
+	{
+		if(memcmp(donor_buf, donor_idps, 0x10)                ||
+		   memcmp(donor_buf + 0x10, donor_data, 0x28)         ||
+		   memcmp(donor_buf + 0x38, donor_R, 0x14)            ||
+		   memcmp(donor_buf + 0x4C, donor_S, 0x14)            ||
+		   memcmp(donor_buf + 0x60, donor_pub, 0x28)          ||
+		   memcmp(donor_buf + 0x88, donor_enc_priv_key, 0x20) ||
+		   memcmp(donor_buf + 0xA8, cmac_hash, 0x10)          ||
+		   memcmp(donor_buf + 0xB8, &donor_padding, 0x08))
+		{
+			log("Error found on patched EID0 section, aborting!\n");
+			goto error;
+		}
 	}
 
 	if(sys_storage_write(dev_id, start_flash_sector, 1, eid_buffer, &writelen, FLASH_FLAGS))
@@ -1573,36 +1741,37 @@ int enable_dex_support()
 		return 1;
 	}
 
-	if(eid_buffer[0x75] == 0x82)
+	if((eid_buffer[0x75] == 0x81 || eid_buffer[0x75] == 0x82) && ret != 2)
 	{
-		if(ret == 1)
-		{
+		if(mode)
+			log("Found DECR TargetID, swapping kernel to DEX...\n");
+		else
 			log("Found DEX TargetID, swapping kernel to DEX...\n");
 
-			if(setFlashKernelData(CEX_TO_DEX) != 0)
-			{
-				log("Error while swapping DEX kernel, restoring flash IDPS...\n");
-				sys_storage_write(dev_id, start_flash_sector, 1, eid_backup, &writelen, FLASH_FLAGS);	
-				goto error;
-			}
-		}
-	}
+		if(setFlashKernelData(CEX_TO_DEX) != 0)
+		{
+			log("Error while swapping DEX kernel, restoring flash IDPS...\n");
+			sys_storage_write(dev_id, start_flash_sector, 1, eid_backup, &writelen, FLASH_FLAGS);	
+			goto error;
+		}		
+	}	
 
 	sys_storage_close(dev_id);
 
-	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0);
-
-	if(!cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &statinfo) && cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &statinfo))
+	if(eid_buffer[0x75] == 0x81)
 	{
-		log("Setting DEX software_update_plugin.sprx...\n");
+		if(!cellFsStat(VSH_SELF_CEX, &statinfo) && cellFsStat(VSH_SELF_DEX, &statinfo))
+		{
+			log("Setting CEX vsh.self...\n");
 
-		if(!cellFsRename(SOFTWARE_UPDATE_SPRX_DEFAULT, SOFTWARE_UPDATE_SPRX_CEX))
-			cellFsRename(SOFTWARE_UPDATE_SPRX_DEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
+			if(!cellFsRename(VSH_SELF_DEFAULT, VSH_SELF_DEX))
+				cellFsRename(VSH_SELF_CEX, VSH_SELF_DEFAULT);
+		}
 	}
+	else
+		set_dex_modules();	
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
-
-	showMessage("msg_sup_dex_enabled", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);	
+	customMessage("msg_sup_dex_enabled", (mode ? OFW_DECR : OFW_DEX), TEX_SUCCESS);
 
 	wait(3);
 	rebootXMB(SYS_SOFT_REBOOT);	
@@ -1611,17 +1780,18 @@ int enable_dex_support()
 
 error:
 	sys_storage_close(dev_id);
-	showMessage("msg_sup_dex_enable_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+	customMessage("msg_sup_dex_enable_error", (mode ? OFW_DECR : OFW_DEX), TEX_ERROR);
 	sys_timer_usleep(10000);
 
 	return 1;
 }
 
-int disable_dex_support()
+int disable_custom_support(int mode)
 {
 	char file[120], eid_root_key_file[120];	
 	int usb_found = 0 , usb_port = 0;
 	int dev_id, ret;
+	int string;
 
 	uint64_t start_flash_sector = 0x178;
 	uint64_t device = FLASH_DEVICE_NOR;	
@@ -1633,7 +1803,7 @@ int disable_dex_support()
 	uint8_t indiv[0x100];
 	uint8_t indiv_clone[0x40];
 
-	CellFsStat stat;
+	CellFsStat statinfo;
 
 	close_xml_list();
 
@@ -1651,15 +1821,24 @@ int disable_dex_support()
 		return 1;
 	}
 
+	if(mode)
+	{
+		if(!check_flash_type())
+		{
+			customMessage("msg_dump_status_not_supported", "NOR", TEX_ERROR);
+			return 1;
+		}
+	}
+
 	if(receive_eid_idps(EID0, idps0))
 	{
 		showMessage("msg_spoof_idps_get_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 		return 1;
 	}
 
-	if(memcmp(idps0, donor_idps, 0x10))
+	if(memcmp(idps0, (mode ? donor_idps_rftool : donor_idps), 0x10))
 	{
-		showMessage("msg_sup_dex_not_converted", (char *)XAI_PLUGIN, (char *)TEX_INFO2);		
+		customMessage("msg_sup_dex_not_converted", (mode ? OFW_DECR : OFW_DEX), TEX_INFO2);	
 		return 1;
 	}
 	
@@ -1673,15 +1852,15 @@ int disable_dex_support()
 
 	// Getting eid_root_key from USB device/internal HDD
 	sprintf_(eid_root_key_file, "/dev_usb%03d/eid_root_key", usb_port);
-	if(cellFsStat(eid_root_key_file, &stat) != CELL_FS_SUCCEEDED)
+	if(cellFsStat(eid_root_key_file, &statinfo) != CELL_FS_SUCCEEDED)
 	{
-		if(cellFsStat(EID_ROOT_KEY_HDD0, &stat) == CELL_FS_SUCCEEDED)
+		if(cellFsStat(EID_ROOT_KEY_HDD0, &statinfo) == CELL_FS_SUCCEEDED)
 			sprintf_(eid_root_key_file, EID_ROOT_KEY_HDD0, NULL);
 		else
 		{
 			// Dump ERK
 			int dumped = 1;
-			showMessage("msg_dumping_erk", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+			customMessage("msg_dumping_status", "ERK", TEX_INFO2);
 			dumped = dump_eid_root_key(eid_root_key, ERK);
 
 			if(dumped)
@@ -1695,14 +1874,23 @@ int disable_dex_support()
 		}	
 	}
 
-	if(readfile(eid_root_key_file, eid_root_key, EID_ROOT_KEY_SIZE))
+	if(readFile(eid_root_key_file, eid_root_key, EID_ROOT_KEY_SIZE))
 		goto done;
 
 	// Getting backup of EID0 from USB device
-	sprintf_(file, EID0_BACKUP, usb_port);
-	if(readfile(file, eid0_buf, 0x200) != CELL_FS_SUCCEEDED)
+	sprintf_(file, (mode ? EID0_DECR_BACKUP : EID0_BACKUP), usb_port);
+	if(readFile(file, eid0_buf, 0x200) != CELL_FS_SUCCEEDED)
 	{
-		showMessage("msg_sup_dex_eid0_not_found", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+		customMessage("msg_sup_dex_eid0_not_found", (mode ? "EID0_DECR_BACKUP.bin" : "EID0_BACKUP.bin"), TEX_ERROR);
+		return 1;
+	}
+
+	// Checking if partial IDPS is valid
+	if(eid0_buf[0x70] != 0x00 || eid0_buf[0x71] != 0x00 || eid0_buf[0x72] != 0x00 || 
+		eid0_buf[0x73] != 0x01 || eid0_buf[0x74] != 0x00 || (mode ? eid0_buf[0x75] != 0x82 : eid0_buf[0x75] == 0x82) || eid0_buf[0x76] != 0x00)
+	{
+		log("IDPS in backup file is not valid!\n");
+		showMessage("msg_idps_not_valid", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
 		return 1;
 	}
 
@@ -1715,22 +1903,16 @@ int disable_dex_support()
 	memcpy(indiv_clone, indiv, 0x40);
 
 	if(AesCbcCfbDecrypt(section0_eid0_dec, eid0_buf + 0x90, 0xC0, key, 0x80, indiv_clone + 0x10) != SUCCEEDED)
-		goto done;
+		goto done;	
 
-	// Checking if partial IDPS is valid
-	// TargetID must not be 0x82
-	if(eid0_buf[0x70] != 0x00 || eid0_buf[0x71] != 0x00 || eid0_buf[0x72] != 0x00 || 
-		eid0_buf[0x73] != 0x01 || eid0_buf[0x74] != 0x00 || eid0_buf[0x75] == 0x82 || eid0_buf[0x76] != 0x00)
+	if(!mode)
 	{
-		showMessage("msg_idps_not_valid", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-		return 1;
+		if(!check_flash_type())
+		{
+			start_flash_sector = 0x204;
+			device = FLASH_DEVICE_NAND;
+		}
 	}
-
-	if(!check_flash_type())
-	{
-		start_flash_sector = 0x204;
-		device = FLASH_DEVICE_NAND;
-	}	
 
 	if(!start_flash_sector || !device)
 		goto done;
@@ -1758,7 +1940,7 @@ int disable_dex_support()
 	{
 		log("Unable to read flash storage\n");
 		goto done;
-	}
+	}	
 
 	if(sys_storage_write(dev_id, start_flash_sector, 1, eid0_buf, &writelen, FLASH_FLAGS))
 	{
@@ -1766,36 +1948,29 @@ int disable_dex_support()
 		return 1;
 	}
 
-	if(eid0_buf[0x75] != 0x82)
+	if(!mode && eid0_buf[0x75] != 0x81 || eid0_buf[0x75] != 0x82)
 	{
-		if(ret == 2)
-		{
-			log("Found CEX TargetID, swapping kernel to CEX...\n");
+		log("Found CEX TargetID, swapping kernel to CEX...\n");
 	
-			if(setFlashKernelData(DEX_TO_CEX) != 0)
-			{
-				log("Error while swapping CEX kernel, restoring flash IDPS...\n");
-				sys_storage_write(dev_id, start_flash_sector, 1, eid_backup, &writelen, FLASH_FLAGS);
-				goto done;
-			}
+		if(setFlashKernelData(DEX_TO_CEX) != 0)
+		{
+			log("Error while swapping CEX kernel, restoring flash IDPS...\n");
+			sys_storage_write(dev_id, start_flash_sector, 1, eid_backup, &writelen, FLASH_FLAGS);
+			goto done;
 		}
+
+		set_cex_modules();
 	}
-
-	sys_storage_close(dev_id);
-
-	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0);
-
-	if(!cellFsStat(SOFTWARE_UPDATE_SPRX_CEX, &stat) && cellFsStat(SOFTWARE_UPDATE_SPRX_DEX, &stat))
+	else if(mode && eid0_buf[0x75] == 0x82)
 	{
-		log("Setting CEX software_update_plugin.sprx...\n");
-
-		if(!cellFsRename(SOFTWARE_UPDATE_SPRX_DEFAULT, SOFTWARE_UPDATE_SPRX_DEX))
-			cellFsRename(SOFTWARE_UPDATE_SPRX_CEX, SOFTWARE_UPDATE_SPRX_DEFAULT);
+		log("Found DEX TargetID, swapping kernel to DEX...\n");
+		setFlashKernelData(CEX_TO_DEX);
+		set_dex_modules();
 	}
 
-	cellFsUtilUnMount(DEV_BLIND, 0);
+	sys_storage_close(dev_id);	
 
-	showMessage("msg_sup_dex_disabled", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);	
+	customMessage("msg_sup_dex_disabled", (mode ? OFW_DECR : OFW_DEX), TEX_SUCCESS);
 
 	wait(3);
 	rebootXMB(SYS_SOFT_REBOOT);
@@ -1804,7 +1979,7 @@ int disable_dex_support()
 
 done:
 	sys_storage_close(dev_id);
-	showMessage("msg_sup_dex_disable_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+	customMessage("msg_sup_dex_disable_error", (mode ? OFW_DECR : OFW_DEX), TEX_ERROR);
 	sys_timer_usleep(10000);
 
 	return 1;

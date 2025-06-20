@@ -163,7 +163,7 @@ int dump_eid_root_key(uint8_t output[0x30], int mode)
 
 	payload_installed = 1;
 
-	metldr_data = (uint8_t *)malloc__(METLDR_SIZE);
+	metldr_data = (uint8_t *)__malloc(METLDR_SIZE);
 	if(!metldr_data)
 	{
 		log("Unable to malloc data\n");
@@ -210,7 +210,7 @@ int dump_eid_root_key(uint8_t output[0x30], int mode)
 
 		final_size = metldr_size + 0x400;
 
-		final_output = (uint8_t *)malloc__(final_size);
+		final_output = (uint8_t *)__malloc(final_size);
 		if(!final_output)
 		{
 			log("Unable to malloc data\n");
@@ -237,9 +237,7 @@ int dump_eid_root_key(uint8_t output[0x30], int mode)
 		}
 
 		buzzer(SINGLE_BEEP);
-		int string = RetrieveString("msg_dump_metldr_ok", (char*)XAI_PLUGIN);	
-		swprintf_(wchar_string, 120, (wchar_t*)string, (int)dump_file_path);	
-		PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);
+		customMessage("msg_dump_metldr_ok", dump_file_path, TEX_SUCCESS);
 	}
 	else
 	{
@@ -263,8 +261,8 @@ error:
 	if(patches_installed)
 		restore_patches();
 
-	free__(metldr_data);
-	free__(final_output);
+	__free(metldr_data);
+	__free(final_output);
 
 	return result;
 }
@@ -299,9 +297,7 @@ void dumperk(int mode)
 			}
 
 			buzzer(SINGLE_BEEP);
-			int string = RetrieveString("msg_dump_erk_ok", (char*)XAI_PLUGIN);	
-			swprintf_(wchar_string, 120, (wchar_t*)string, (int)dump_file_path);	
-			PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);		
+			customMessage("msg_dump_erk_ok", dump_file_path, TEX_SUCCESS);
 		}
 	}
 	else

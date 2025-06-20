@@ -72,18 +72,18 @@ static int (*_cellRtcSetCurrentTick)(uint64_t *pTick) = 0;
 static void (*NotifyWithTexture)(int32_t, const char *eventName, int32_t, int32_t *texture, int32_t*, const char*, const char*, float, const wchar_t *text, int32_t, int32_t, int32_t);
 static uint32_t (*FindTexture)(int32_t *texptr, uint32_t plugin, const char *name);
 
-static void (*free_)(void *);
-static void *(*malloc_)(size_t);
-static void *(*memalign_)(size_t boundary, size_t size_arg);
+static void (*_free)(void *);
+static void *(*_malloc)(size_t);
+static void *(*_memalign)(size_t boundary, size_t size_arg);
 
 static size_t (*wcstombs_)(char *dest, const wchar_t *src, size_t max);
-static uint64_t (*stoull_)(const char *ptr, char **endptr, int base);
+static uint64_t (*_stoull)(const char *ptr, char **endptr, int base);
 
-static FILE *(*fopen_)(const char *filename, const char *mode);
-static size_t *(*fread_)(void *pointer, size_t size, size_t nmemb, FILE *stream);
-static int (*fclose_)(FILE *stream);
-static int (*fprintf_)(FILE *stream, const char *format, ...);
-static char *(*ctime_)(const time_t *timer);
+static FILE *(*_fopen)(const char *filename, const char *mode);
+static size_t *(*_fread)(void *pointer, size_t size, size_t nmemb, FILE *stream);
+static int (*_fclose)(FILE *stream);
+static int (*_fprintf)(FILE *stream, const char *format, ...);
+static char *(*_ctime)(const time_t *timer);
 
 static void (*xRegistrySetValue)(unsigned int handle, unsigned int path, unsigned int value, unsigned int size, int unk) = 0;
 static int (*xRegistryGetValue)(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4, unsigned int a5, unsigned int a6) = 0;

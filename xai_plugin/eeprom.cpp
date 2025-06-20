@@ -198,7 +198,7 @@ int dump_eeprom()
 	usb_port = get_usb_device();
 
 	if(usb_port != -1)
-		sprintf_(location, "/dev_usb%03d", usb_port, NULL);		
+		sprintf_(location, DEV_USB_FIND, usb_port, NULL);		
 	
 	if(dump_eeprom_data(0x2F00, location) != CELL_FS_SUCCEEDED)
 		goto error;
@@ -223,13 +223,11 @@ int dump_eeprom()
 	usb_port = get_usb_device();
 
 	if(usb_port != -1)
-		sprintf_(usb_location, "/dev_usb%03d", usb_port);
+		sprintf_(usb_location, DEV_USB_FIND, usb_port);
 
 	buzzer(SINGLE_BEEP);
 
-	string = RetrieveString("msg_dump_eeprom_done", (char*)XAI_PLUGIN);	
-	swprintf_(wchar_string, 120, (wchar_t*)string, (int)(usb_port != -1 ? usb_location : location));
-	PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);
+	customMessage("msg_dump_eeprom_done", (usb_port != -1 ? usb_location : location), TEX_SUCCESS);
 
 	return 0;
 

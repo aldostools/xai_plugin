@@ -134,9 +134,9 @@
 #define PS3MAPI_OPCODE_PDISABLE_SYSCALL8    			0x0093
 #define PS3MAPI_OPCODE_PCHECK_SYSCALL8 					0x0094
 #define PS3MAPI_OPCODE_CREATE_CFW_SYSCALLS				0x0095
-#define PS3MAPI_OPCODE_ALLOW_RESTORE_SYSCALLS			0x0096
-#define PS3MAPI_OPCODE_GET_RESTORE_SYSCALLS				0x0097
-#define PS3MAPI_OPCODE_SWAP_PS2_ICON_COLOR 				0x0098
+//#define PS3MAPI_OPCODE_ALLOW_RESTORE_SYSCALLS			0x0096
+//#define PS3MAPI_OPCODE_GET_RESTORE_SYSCALLS				0x0097
+//#define PS3MAPI_OPCODE_SWAP_PS2_ICON_COLOR 				0x0098
 #define PS3MAPI_OPCODE_REMOVE_HOOK						0x0101
 #define PS3MAPI_OPCODE_SUPPORT_SC8_PEEK_POKE			0x1000
 #define PS3MAPI_OPCODE_LV2_PEEK							0x1006
@@ -155,15 +155,15 @@
 #define PS3MAPI_OPCODE_SET_FAN_SPEED					0x2235
 #define PS3MAPI_OPCODE_SET_PS2_FAN_SPEED				0x2236
 
-#define PS3MAPI_OPCODE_GET_SKIP_EXISTING_RIF			0x2240
-#define PS3MAPI_OPCODE_SKIP_EXISTING_RIF				0x2241
+//#define PS3MAPI_OPCODE_GET_SKIP_EXISTING_RIF			0x2240
+//#define PS3MAPI_OPCODE_SKIP_EXISTING_RIF				0x2241
 
 #define PS3MAPI_OPCODE_RING_BUZZER 						0x2245
 
 #define PS3MAPI_OPCODE_CREATE_RIF 		 				0x2249
 
 #define PS3MAPI_OPCODE_GAMEBOOT 						0x2250
-#define PS3MAPI_OPCODE_EPILEPSY_WARNING					0x2251
+//#define PS3MAPI_OPCODE_EPILEPSY_WARNING					0x2251
 #define PS3MAPI_OPCODE_COLDBOOT 						0x2252
 #define PS3MAPI_OPCODE_TROPHY 							0x2253
 
@@ -198,15 +198,14 @@ typedef struct
 	uint32_t spoof_revision;
 	uint8_t fan_speed; 		    // 0 = Disabled | 1 = SYSCON | Dynamic Fan Controller (2 = Max 60°C | 3 = Max 65°C | 4 = Max 70°C | 5 = Max 75°C) | 0x33 to 0xFF = Manual
 	uint8_t ps2_speed;		    // 0 = Disabled | 1 = SYSCON | 0x60 | 0x65 | 0x70 | 0x75 | 0x80 | 0x85 | 0x90
-	uint8_t allow_restore_sc;   // 0 = Does not allow to restore CFW syscalls | 1 = Allow to restore CFW syscalls 
-	uint8_t skip_existing_rif;  // 0 = Does not skip if .rif already exists | 1 = Skip if .rif already exists
-	uint8_t color_disc; 	    // 0 = Default (PS2 DVD: yellow disc icon - PS2 CD: blue disc icon) | 1 = PS2 CD/DVD: blue disc icon
+	//uint8_t allow_restore_sc;   // 0 = Does not allow to restore CFW syscalls | 1 = Allow to restore CFW syscalls 
+	//uint8_t skip_existing_rif;  // 0 = Does not skip if .rif already exists | 1 = Skip if .rif already exists
+	//uint8_t color_disc; 	    // 0 = Default (PS2 DVD: yellow disc icon - PS2 CD: blue disc icon) | 1 = PS2 CD/DVD: blue disc icon
 	uint8_t syscalls_mode;      // 0 = CFW syscalls are enabled on boot (Default) | 1 = Fully disable CFW syscalls on boot | 2 = Keep PS3M_API Features only
 	uint8_t gameboot_mode; 	    // 0 = Disabled (Default) | 1 = Enabled
-	uint8_t epilepsy_warning;   // 0 = Disabled (Default) | 1 = Enabled
+	//uint8_t epilepsy_warning;   // 0 = Disabled (Default) | 1 = Enabled
 	uint8_t coldboot_mode; 	    // 0 = Enabled (Default)  | 1 = Disabled 
 	uint8_t hidden_trophy_mode; // 0 = Enabled (Default)  | 1 = Disabled (Will show hidden trophy data)
-	uint8_t rap_mode; 			// 0 = Disabled (Default) | 1 = Enabled (Load licenses from rap.bin)
 } __attribute__((packed)) CobraConfig;
 
 int check_syscall8();

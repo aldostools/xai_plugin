@@ -79,6 +79,7 @@
     <ClCompile Include="log.cpp" />
     <ClCompile Include="mm.cpp" />
     <ClCompile Include="otheros.cpp" />
+    <ClCompile Include="overclock.cpp" />
     <ClCompile Include="payload.cpp" />
     <ClCompile Include="prx.cpp" />
     <ClCompile Include="qa.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="mm.h" />
     <ClInclude Include="otheros.h" />
+    <ClInclude Include="overclock.h" />
     <ClInclude Include="payload.h" />
     <ClInclude Include="ps3_savedata_plugin.h" />
     <ClInclude Include="qa.h" />

@@ -170,28 +170,28 @@ int set_accountID(int mode, int overwrite)
     sprintf_(autoLogin, SETTING_AUTOSIGN, userID, NULL);
     sprintf_(accountid, SETTING_ACCOUNTID, userID, NULL);
 
-	uint8_t *dump = (uint8_t *)malloc__(XREGISTRY_FILE_SIZE);	
+	uint8_t *dump = (uint8_t *)__malloc(XREGISTRY_FILE_SIZE);	
 
 	if(!dump)
 		return 4;
 
-	if(readfile(XREGISTRY_FILE, dump, XREGISTRY_FILE_SIZE))
+	if(readFile(XREGISTRY_FILE, dump, XREGISTRY_FILE_SIZE))
 	{
-		free__(dump);
+		__free(dump);
 		return 3;
 	}
 
 	ret = search_data((char *)dump, autoLogin, AUTOSIGN, WRITE, 0, 0, account_id);
 	if(ret == 2)
 	{
-		free__(dump);
+		__free(dump);
 		return 2;
 	}
 
 	ret = search_data((char *)dump, accountid, ACCOUNTID, mode, overwrite, 0, account_id);
 	switch(ret)
 	{
-		free__(dump);
+		__free(dump);
 
 		case 1:
 			return 1;
@@ -201,7 +201,7 @@ int set_accountID(int mode, int overwrite)
 
 	saveFile(XREGISTRY_FILE, dump, XREGISTRY_FILE_SIZE);
 
-	free__(dump);
+	__free(dump);
 	return 0;
 }
 
@@ -225,16 +225,16 @@ int patch_savedatas(const char *path)
 	userID = xUserGetInterface()->GetCurrentUserNumber();	
 	sprintf_(acc_char, SETTING_ACCOUNTID, userID, NULL);	
 
-	uint8_t *dump = (uint8_t *)malloc__(XREGISTRY_FILE_SIZE);
+	uint8_t *dump = (uint8_t *)__malloc(XREGISTRY_FILE_SIZE);
 
 	if(!dump)
 		return -1;
 
 	if(cellFsStat(path_file, &stat) == SUCCEEDED)
 	{
-		if(readfile(XREGISTRY_FILE, dump, XREGISTRY_FILE_SIZE))
+		if(readFile(XREGISTRY_FILE, dump, XREGISTRY_FILE_SIZE))
 		{
-			free__(dump);
+			__free(dump);
 			return 1;
 		}
 
@@ -244,23 +244,23 @@ int patch_savedatas(const char *path)
 				
 		// Read and retrieve PARAM.SFO data		
         uint8_t *temp_data_sfo = NULL;
-		temp_data_sfo = (uint8_t *) malloc__(stat.st_size);
+		temp_data_sfo = (uint8_t *) __malloc(stat.st_size);
 
         if(!temp_data_sfo)
 			return -1;		
 
         memcpy(&sfo_data.size, (void *)&stat.st_size, 16);
         strcpy(sfo_data.file_path, path_file);          
-		if(readfile(path_file, temp_data_sfo, stat.st_size))
+		if(readFile(path_file, temp_data_sfo, stat.st_size))
 		{
-			free__(temp_data_sfo);
+			__free(temp_data_sfo);
 			return 3;
 		}	
 
 		// PARAM.SFO not valid
 		if(memcmp(temp_data_sfo, &magicSFO, 4)) 
 		{
-			free__(temp_data_sfo);
+			__free(temp_data_sfo);
 			return 4;
 		}
 
@@ -296,7 +296,7 @@ int patch_savedatas(const char *path)
 		sha1_hmac(sfo_data.disc_hash_hash, temp_data_sfo, stat.st_size, disc_hash_key, 0x10);
 		sha1_hmac(sfo_data.authentication_id_hash, temp_data_sfo, stat.st_size, authentication_id, 8);	
 
-		free__(dump);
+		__free(dump);
 
 		sprintf_(path_file, "%s/PARAM.PFD", (int)path, NULL);		
 
@@ -304,29 +304,29 @@ int patch_savedatas(const char *path)
 		{		
 			// Read and retrieve PARAM.PFD data		
             uint8_t *temp_data_pfd = NULL;
-			temp_data_pfd = (uint8_t *) malloc__(stat.st_size);
+			temp_data_pfd = (uint8_t *) __malloc(stat.st_size);
 
             if(!temp_data_pfd)
 			{
-				free__(temp_data_sfo);
+				__free(temp_data_sfo);
 				return -1;
 			}
 
             memcpy(&pfd_data.size, (void *)&stat.st_size, 16);
             strcpy(pfd_data.file_path, path_file);
 
-			if(readfile(path_file, temp_data_pfd, stat.st_size))
+			if(readFile(path_file, temp_data_pfd, stat.st_size))
 			{
-				free__(temp_data_sfo);
-				free__(temp_data_pfd);
+				__free(temp_data_sfo);
+				__free(temp_data_pfd);
 				return 5;
 			}
 
 			// PARAM.PFD not valid
 			if(memcmp(temp_data_pfd, &magicPFD, 8))
 			{
-				free__(temp_data_sfo);
-				free__(temp_data_pfd);
+				__free(temp_data_sfo);
+				__free(temp_data_pfd);
 				return 6;
 			}
 
@@ -367,30 +367,29 @@ int patch_savedatas(const char *path)
 
 			// Encrypt header
 			AesCbcCfbEncrypt(temp_data_pfd + 0x20, temp_data_pfd + 0x20, 0x40, syscon_manager_key, 128, pfd_data.vector);
-			
 
 			// Write new files
 			if(saveFile(sfo_data.file_path, temp_data_sfo, sfo_data.size))
 			{
-				free__(temp_data_sfo);	
-				free__(temp_data_pfd);
+				__free(temp_data_sfo);	
+				__free(temp_data_pfd);
 				return 7;
 			}
 
 			if(saveFile(pfd_data.file_path, temp_data_pfd, pfd_data.size))
 			{
-				free__(temp_data_sfo);	
-				free__(temp_data_pfd);
+				__free(temp_data_sfo);	
+				__free(temp_data_pfd);
 				return 7;
 			}
 
-			free__(temp_data_sfo);	
-			free__(temp_data_pfd);	
+			__free(temp_data_sfo);	
+			__free(temp_data_pfd);	
 
 			return SUCCEEDED;		
 		}		
 
-		free__(temp_data_sfo);				
+		__free(temp_data_sfo);				
 	}
 	
 	return -1;
@@ -426,7 +425,7 @@ int export_rap()
 		return 1;
 	}
 
-	sprintf_(exdata_folder, "/dev_usb%03d/exdata", usb_port);
+	sprintf_(exdata_folder, DEV_USB_EXDATA, usb_port);
 	if(cellFsStat(exdata_folder, &statinfo))
 		cellFsMkdir(exdata_folder, 0777);
 
@@ -440,7 +439,7 @@ int export_rap()
 	}	
 
 	uint32_t userID = xUserGetInterface()->GetCurrentUserNumber();
-	sprintf_(exdata_path, "/dev_hdd0/home/%08d/exdata", userID, NULL);
+	sprintf_(exdata_path, HOME_EXDATA, userID, NULL);
 
 	if(!cellFsOpendir(exdata_path, &fd))
 	{
@@ -463,20 +462,20 @@ int export_rap()
 			strncpy(contentID, license_file + 31, 40);
 			contentID[36] = '\0';
 
-			sprintf_(license_file, "/dev_hdd0/home/%08d/exdata/%s.rif", userID, (int)contentID);
+			sprintf_(license_file, EXDATA_RIF_FILE, userID, (int)contentID);
 
 			log("Exporting %s.rap...\n", contentID);
 
-			if(readfile(license_file, (uint8_t *)&rif, 0x98) != CELL_FS_SUCCEEDED)
+			if(readFile(license_file, (uint8_t *)&rif, 0x98) != CELL_FS_SUCCEEDED)
 				goto error;
 
 			sprintf_(actdat_path, ACT_DAT_PATH, userID); 
-			actdat = (struct actdat_t*)malloc__(0x1038);
+			actdat = (struct actdat_t*)__malloc(ACT_DAT_SIZE);
 
 			if(!actdat)
 				goto error;
 
-			if(readfile(actdat_path, (uint8_t *)actdat, 0x1038) != CELL_FS_SUCCEEDED)
+			if(readFile(actdat_path, (uint8_t *)actdat, ACT_DAT_SIZE) != CELL_FS_SUCCEEDED)
 			{
 				showMessage("msg_account_act_not_found", (char*)XAI_PLUGIN, (char*)TEX_ERROR);	
 				goto error;
@@ -526,20 +525,15 @@ int export_rap()
 			if(saveFile(license_file, rap_key, 0x10) != 0)
 			{
 				error:
-				free__(actdat);
+				__free(actdat);
 				cellFsClosedir(fd);
 
 				sprintf_(license_file, "%s.rap", (int)contentID);
-				string = RetrieveString("msg_rif_create_error", (char*)XAI_PLUGIN);	
-				swprintf_(wchar_string, 120, (wchar_t*)string, (int)license_file);
-				PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_ERROR);
+
+				customMessage("msg_rif_create_error", license_file, TEX_ERROR);
 
 				if(rap_created > 1)
-				{
-					string = RetrieveString("msg_rifs_created", (char*)XAI_PLUGIN);	
-					swprintf_(wchar_string, 120, (wchar_t*)string, rap_created);
-					PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_ERROR);
-				}
+					customMessage("msg_rifs_created", rap_created, TEX_ERROR);
 				else if(rap_created == 1)
 					showMessage("msg_rif_created", (char*)XAI_PLUGIN, (char*)TEX_ERROR);
 
@@ -548,7 +542,7 @@ int export_rap()
 				return 1;
 			}
 
-			free__(actdat);
+			__free(actdat);
 			rap_created++;
 		}
 
@@ -557,11 +551,7 @@ int export_rap()
 			cellFsClosedir(fd);
 
 			if(rap_created > 1)
-			{
-				string = RetrieveString("msg_rifs_created", (char*)XAI_PLUGIN);	
-				swprintf_(wchar_string, 120, (wchar_t*)string, rap_created);
-				PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);
-			}
+				customMessage("msg_rifs_created", rap_created, TEX_SUCCESS);
 			else
 				showMessage("msg_rif_created", (char*)XAI_PLUGIN, (char*)TEX_SUCCESS);	
 
@@ -569,7 +559,7 @@ int export_rap()
 		}
 	}
 
-	showMessage("msg_rif_not_found", (char*)XAI_PLUGIN, (char*)TEX_ERROR);	
+	customMessage("msg_files_not_found", "RIF", TEX_ERROR);
 	cellFsClosedir(fd);
 	return 0;
 }

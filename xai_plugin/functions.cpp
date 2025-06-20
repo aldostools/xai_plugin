@@ -10,16 +10,16 @@
 #include "otheros.h"
 #include "savegames.h"
 
+static wchar_t wchar_string[360]; // Global variable for swprintf
+
 int mount_dev_blind()
 {
-	system_call_8(837, (uint64_t)"CELL_FS_IOS:BUILTIN_FLSH1", (uint64_t)"CELL_FS_FAT", (uint64_t)DEV_BLIND, 0, 0, 0, 0, 0);
-	return_to_user_prog(int);
+	return cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", DEV_BLIND, 0, 0, 0, 0);
 }
 
 int umount_dev_blind()
 {
-	system_call_1(838, (uint64_t)DEV_BLIND);
-	return_to_user_prog(int);
+	return cellFsUtilUnMount(DEV_BLIND, 0);
 }
 
 int lv2_ss_get_cache_of_flash_ext_flag(uint8_t *flag)
@@ -64,7 +64,6 @@ int lv2_storage_write(uint32_t dev_handle, uint64_t unknown1, uint64_t start_sec
 	system_call_7(603, dev_handle, unknown1, start_sector, sector_count, (uint64_t ) buf, (uint64_t) unknown2, flags);
 	return_to_user_prog(int);
 }
-
 
 int sys_storage_get_device_info(uint64_t device, storage_device_info *device_info)
 {

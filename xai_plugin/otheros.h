@@ -60,6 +60,11 @@
 #define	GAMEOS_FLAG											0
 #define	OTHEROS_FLAG										1
 
+// dtbImage.ps3.bin (NOR) = CA5E9520E03066290F68F67E9167C0FA  
+// dtbImage.ps3.bin.minimal (NAND) = 6B98E0AC2413CB77659179468F6AD0B5  
+static uint8_t nor_image_md5[0x10] = { 0xCA, 0x5E, 0x95, 0x20, 0xE0, 0x30, 0x66, 0x29, 0x0F, 0x68, 0xF6, 0x7E, 0x91, 0x67, 0xC0, 0xFA };
+static uint8_t nand_image_md5[0x10] = { 0x6B, 0x98, 0xE0, 0xAC, 0x24, 0x13, 0xCB, 0x77, 0x65, 0x91, 0x79, 0x46, 0x8F, 0x6A, 0xD0, 0xB5 };
+
 struct storage_device_info 
 {
 	uint8_t res1[32];
@@ -135,9 +140,7 @@ struct os_area_db
 	uint8_t res3[1000];
 };
 
-int setup_vflash();
-int setup_flash();
-int install_petitboot();
 int set_flag(int flag);
+int setup_otherOS();
 
 #endif __OTHEROS_H__

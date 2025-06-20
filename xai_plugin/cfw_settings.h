@@ -70,6 +70,20 @@
 #define LIBAUDIO_PATCHED				"/dev_blind/sys/external/libaudio.sprx.patched"
 #define RAP_BIN_HDD_PATH				"/dev_hdd0/exdata/rap.bin"
 
+#define DEV_USB_FIND					"/dev_usb%03d"
+#define DEV_USB_EXDATA					"/dev_usb%03d/exdata"
+#define DEV_HDD0_EXDATA					"/dev_hdd0/exdata"
+#define HOME_EXDATA						"/dev_hdd0/home/%08d/exdata"
+
+#define DEV_HDD0_ACT					"/dev_hdd0/tmp/act.dat"
+#define EXDATA_RIF_FILE					"/dev_hdd0/home/%08d/exdata/%s.rif"
+
+#define LINES_QRC_DEFAULT				"/dev_blind/vsh/resource/qgl/lines.qrc"
+#define LINES_QRC_ORI					"/dev_blind/vsh/resource/qgl/lines.qrc.ori"
+#define LINES_QRC_MOD					"/dev_blind/vsh/resource/qgl/lines.qrc.mod"
+
+#define BDVD_DEV_ID					0x101000000000006ULL
+
 #define LV2							0
 #define LV1							1
 #define RAM							2
@@ -94,6 +108,8 @@
 
 #define RAP2BIN_HDD					0
 #define RAP2BIN_USB					1
+
+#define ACT_DAT_SIZE				0x1038
 
 typedef struct
 {
@@ -262,22 +278,26 @@ int GetIDPS(void *idps);
 int update_mgr_read_eeprom(int offset, void *buffer);
 int update_mgr_write_eeprom(int offset, int value);
 
-void free__(void *ptr);
-int malloc__(size_t size);
-FILE *fopen__(const char *filename, const char *mode);
-size_t fread__(void *pointer, size_t size, size_t nmemb, FILE *stream);
-int fclose__(FILE *stream);
-int memalign__(size_t boundary, size_t size_arg);
+void __free(void *ptr);
+int __malloc(size_t size);
+FILE *__fopen(const char *filename, const char *mode);
+size_t __fread(void *pointer, size_t size, size_t nmemb, FILE *stream);
+int __fclose(FILE *stream);
+int __memalign(size_t boundary, size_t size_arg);
 
 void load_cfw_functions();
 int RetrieveString(const char *string, const char *plugin);
 void PrintString(wchar_t *string, const char *plugin, const char *tex_icon);
 
 int saveFile(const char *path, void *data, size_t size);
-int readfile(const char *file, uint8_t *buffer, size_t size);
+int readFile(const char *file, uint8_t *buffer, size_t size);
 int get_usb_device();
 
 void showMessage(const char *string, const char *plugin, const char *tex_icon);
+int customMessage(const char *msg_string, const char *text, const char *mode);
+int customMessage(const char *msg_string, int data, const char *mode);
+int customMessage2(const char *msg_string, const char *msg_string2, const char *mode);
+
 int patch_savedata();
 int create_rifs();
 int getAccountID();
@@ -291,7 +311,7 @@ int dump_lv(int lv);
 int dumpERK(int mode);
 int dump_sysrom();
 int removeSysHistory();
-void checkSyscall(int syscall);
+//void checkSyscall(int syscall);
 
 int set_qa(int value);
 
@@ -299,12 +319,12 @@ void show_cobra_info();
 int save_cobra_fan_cfg(int mode);
 int save_ps2_fan_cfg(int mode);
 
-void allow_restore_sc();
-void skip_existing_rif();
-void toogle_PS2_disc_icon();
+//void allow_restore_sc();
+//void skip_existing_rif();
+//void toogle_PS2_disc_icon();
 void toggle_ofw_mode();
 void toggle_gameboot();
-void toggle_epilepsy_warning();
+//void toggle_epilepsy_warning();
 void toggle_coldboot_animation();
 void toggle_hidden_trophy_patch();
 
@@ -350,14 +370,12 @@ void toggle_8th_spe();
 
 void enable_WhatsNew();
 
-int getClockSpeeds();
-
 void setLed(const char *mode);
 
 void close_xml_list();
 
-int load_ftp();
-int unload_ftp();
+//int load_ftp();
+//int unload_ftp();
 int toggle_trophy_unlocker();
 
 void spoof_idps();
@@ -366,7 +384,6 @@ void spoof_psid();
 int Patch_ProDG();
 void unlock_hdd_space();
 
-void show_ip();
 void getPS3Lifetime();
 
 int toggle_npsignin_lck();
@@ -378,6 +395,7 @@ int get_temperature_data();
 
 int spoof_mac();
 void show_ids();
+void show_ip();
 int patch_xreg_value(char *str, uint32_t value);
 
 void set_region_default();
@@ -393,5 +411,7 @@ void show_bd_info();
 
 int rap2bin();
 int bin2rap();
+
+void toggle_xmb_waves();
 
 #endif /* _CFW_SETTINGS_H */

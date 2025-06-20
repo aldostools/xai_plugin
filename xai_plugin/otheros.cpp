@@ -14,21 +14,12 @@
 #include "log.h"
 #include "cfw_settings.h"
 
-int setup_vflash()
+static int setup_vflash()
 {
 	int start_sector, sector_count;
 	uint8_t buf[VFLASH_SECTOR_SIZE * VFLASH_SECTOR_COUNT];
 	uint32_t dev_handle = 0, unknown;	
 	uint64_t *ptr;
-
-	// HEN
-	if(!is_hen())
-	{
-		showMessage("msg_hen_notsupported_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-		return 1;
-	}
-
-	close_xml_list();
 
 	if(lv2_storage_open(VFLASH_DEV_ID, &dev_handle))
 		goto error;	
@@ -60,31 +51,19 @@ int setup_vflash()
 	sys_timer_usleep(10000);	
 	lv2_storage_close(dev_handle);
 
-	showMessage("msg_otheros_resize_success", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
-
 	return 0;
 
 error:
 	lv2_storage_close(dev_handle);
-	showMessage("msg_otheros_resize_vflash_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 	return 1;
 }
 
-int setup_flash()
+static int setup_flash()
 {	
 	int start_sector, sector_count;
 	uint8_t buf[FLASH_SECTOR_SIZE * FLASH_SECTOR_COUNT];
 	uint32_t unknown, dev_handle = 0;	
 	uint64_t *ptr;
-
-	// HEN
-	if(!is_hen())
-	{
-		showMessage("msg_hen_notsupported_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-		return 1;
-	}
-
-	close_xml_list();
 
 	if(lv2_storage_open(FLASH_DEV_ID, &dev_handle))
 		goto error;	
@@ -123,23 +102,18 @@ int setup_flash()
 	sys_timer_usleep(10000);
 	lv2_storage_close(dev_handle);
 
-	showMessage("msg_otheros_resize_success", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
-
 	return 0;
 
 error:
 	lv2_storage_close(dev_handle);
-	showMessage("msg_otheros_resize_flash_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
 	return 1;
 }
 
-int install_petitboot()
+static int install_petitboot(char *filename)
 {
 	int fd, bytes;
-	int file_sectors, start_sector, sector_count;	
+	int file_sectors, start_sector, sector_count;
 
-	FILE *file_md5;
-	CellMd5WorkArea mdContext;	
 	CellFsStat stat;
 	uint8_t buf[VFLASH5_SECTOR_SIZE * 16];
 	uint32_t dev_handle = 0, unknown;
@@ -150,70 +124,8 @@ int install_petitboot()
 	struct os_area_params *params;
 	struct os_area_db *db;	
 
-	char filename[120];
 	unsigned char checksum[0x10], data[1024];
 	int file_found = 0;
-
-	// HEN
-	if(!is_hen())
-	{
-		showMessage("msg_hen_notsupported_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-		return 1;
-	}
-
-	close_xml_list();
-
-	int flashType = check_flash_type();
-
-	for(int i = 0; i < 127; i++) 
-	{
-		if(flashType)
-			sprintf_(filename, "/dev_usb%03d/%s", i, (int)PETITBOOT_NOR);
-		else
-			sprintf_(filename, "/dev_usb%03d/%s", i, (int)PETITBOOT_NAND);
-
-		if(!cellFsStat(filename, &stat))
-		{
-			file_found = 1;
-			break;
-		}
-	}
-
-	if(!file_found)
-	{
-		if(flashType)
-			showMessage("msg_otheros_nor_file_not_found", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-		else
-			showMessage("msg_otheros_nand_file_not_found", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-
-		return 1;
-	}
-
-	showMessage("msg_otheros_petitboot_md5_check", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
-
-	/* Check MD5 */
-	// dtbImage.ps3.bin (NOR) = CA5E9520E03066290F68F67E9167C0FA  
-	// dtbImage.ps3.bin.minimal (NAND) = 6B98E0AC2413CB77659179468F6AD0B5  
-	uint8_t nor_image_md5[0x10] = { 0xCA, 0x5E, 0x95, 0x20, 0xE0, 0x30, 0x66, 0x29, 0x0F, 0x68, 0xF6, 0x7E, 0x91, 0x67, 0xC0, 0xFA };
-	uint8_t nand_image_md5[0x10] = { 0x6B, 0x98, 0xE0, 0xAC, 0x24, 0x13, 0xCB, 0x77, 0x65, 0x91, 0x79, 0x46, 0x8F, 0x6A, 0xD0, 0xB5 };
-	
-	cellMd5BlockInit(&mdContext);
-
-	file_md5 = fopen__(filename, "rb");
-
-	while((bytes = (int)fread__(data, 1, 1024, file_md5)) != 0)	
-        cellMd5BlockUpdate(&mdContext, data, bytes);
-
-	cellMd5BlockResult(&mdContext, checksum);
-	fclose__(file_md5);
-
-	if(memcmp(checksum, (flashType ? nor_image_md5 : nand_image_md5), 0x10))
-	{
-		showMessage("msg_otheros_petitboot_md5_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-		return 1;
-	}
-
-	showMessage("msg_otheros_petitboot_installing", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
 
 	if(cellFsStat(filename, &stat) == CELL_FS_SUCCEEDED)
 	{
@@ -285,16 +197,12 @@ int install_petitboot()
 
 			lv2_storage_close(dev_handle);	
 
-			showMessage("msg_otheros_petitboot_success", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
-
 			return 0;
 		}	
 	}
 
 error:
 	lv2_storage_close(dev_handle);	
-	showMessage("msg_otheros_petitboot_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
-
 	return 1;
 }
 
@@ -356,9 +264,7 @@ int set_flag(int flag)
 
 	if(!flag && params->boot_flag == flag)
 	{
-		string = RetrieveString("msg_otheros_flag_already_set", (char*)XAI_PLUGIN);	
-		swprintf_(wchar_string, 120, (wchar_t*)string, (int)(flag ? "OtherOS" : "GameOS"));	
-		PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_INFO2);
+		customMessage("msg_otheros_flag_already_set", (flag ? "OtherOS" : "GameOS"), TEX_INFO2);
 
 		lv2_storage_close(dev_handle);
 		return 0;
@@ -386,10 +292,98 @@ int set_flag(int flag)
 	return 0;
 
 error:
-	string = RetrieveString("msg_otheros_flag_error", (char*)XAI_PLUGIN);	
-	swprintf_(wchar_string, 120, (wchar_t*)string, (int)(flag ? "OtherOS" : "GameOS"));	
-	PrintString(wchar_string, (char*)XAI_PLUGIN, (char*)TEX_INFO2);
-	
+	customMessage("msg_otheros_flag_error", (flag ? "OtherOS" : "GameOS"), TEX_ERROR);	
 	lv2_storage_close(dev_handle);
 	return 1;
+}
+
+int setup_otherOS()
+{
+	FILE *file_md5;
+	CellMd5WorkArea mdContext;
+	CellFsStat stat;
+	char filename[120];
+	int bytes, file_found = 0;
+	int string, ret = 0;
+	unsigned char checksum[0x10], data[1024];	
+	wchar_t wchar_string[120];
+
+	// HEN
+	if(!is_hen())
+	{
+		showMessage("msg_hen_notsupported_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+		return 1;
+	}
+
+	close_xml_list();	
+
+	int flashType = check_flash_type();
+
+	log("Flash type: %s detected\n", (flashType ? "NOR" : "NAND"));
+
+	for(int i = 0; i < 127; i++) 
+	{
+		if(flashType)
+			sprintf_(filename, "/dev_usb%03d/%s", i, (int)PETITBOOT_NOR);
+		else
+			sprintf_(filename, "/dev_usb%03d/%s", i, (int)PETITBOOT_NAND);
+
+		if(!cellFsStat(filename, &stat))
+		{
+			log("Found dbtImage: %s\n", filename);
+			file_found = 1;
+			break;
+		}
+	}
+
+	if(!file_found)
+	{
+		customMessage("msg_otheros_status_file_not_found", (flashType ? PETITBOOT_NOR : PETITBOOT_NAND), TEX_ERROR);
+		return 1;
+	}
+
+	showMessage("msg_otheros_petitboot_md5_check", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+
+	cellMd5BlockInit(&mdContext);
+
+	file_md5 = __fopen(filename, "rb");
+
+	while((bytes = (int)__fread(data, 1, 1024, file_md5)) != 0)	
+        cellMd5BlockUpdate(&mdContext, data, bytes);
+
+	cellMd5BlockResult(&mdContext, checksum);
+	__fclose(file_md5);
+
+	if(memcmp(checksum, (flashType ? nor_image_md5 : nand_image_md5), 0x10))
+	{
+		showMessage("msg_otheros_petitboot_md5_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+		return 1;
+	}
+
+	log("MD5 %s: OK\n", filename);
+
+	customMessage("msg_os_resizing_flash", (flashType ? "VFLASH" : "FLASH"), TEX_INFO2);
+
+	if(flashType)
+		ret = setup_vflash();
+	else
+		ret = setup_flash();
+
+	if(ret)
+	{
+		customMessage("msg_otheros_resize_status_error", (flashType ? "VFLASH" : "FLASH"), TEX_ERROR);
+		return 1;
+	}
+
+	showMessage("msg_otheros_petitboot_installing", (char *)XAI_PLUGIN, (char *)TEX_INFO2);
+
+	if(install_petitboot(filename))
+	{
+		showMessage("msg_otheros_petitboot_error", (char *)XAI_PLUGIN, (char *)TEX_ERROR);
+		return 1;
+	}
+
+	showMessage("msg_os_setup_finished", (char *)XAI_PLUGIN, (char *)TEX_SUCCESS);
+
+	return 0;
 }

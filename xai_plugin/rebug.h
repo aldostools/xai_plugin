@@ -51,7 +51,7 @@
 #define SYSCONF_PLUGIN_RCO_CEX			"/dev_blind/vsh/resource/sysconf_plugin.rco.cex"
 #define SYSCONF_PLUGIN_RCO_DEX			"/dev_blind/vsh/resource/sysconf_plugin.rco.dex"
 
-int toggle_xmb_plugin();
+//int toggle_xmb_plugin();
 int toggle_xmb_mode();
 int normal_mode();
 int rebug_mode();
